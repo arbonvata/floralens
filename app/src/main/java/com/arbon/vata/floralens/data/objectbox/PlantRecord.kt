@@ -1,8 +1,11 @@
 package com.arbon.vata.floralens.data.objectbox
 
+import io.objectbox.annotation.Entity
+import io.objectbox.annotation.Id
 
+@Entity
 data class PlantRecord(
-    var id: Long = 0,
+    @Id var id: Long = 0,
     var detectedSpecies: String = "",
     var commonName: String = "",
     var diseaseName: String? = null,
