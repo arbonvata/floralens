@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:8039897946384294131",
-      "lastPropertyId": "10:8980115788730082750",
+      "lastPropertyId": "14:406357433156011560",
       "name": "PlantRecord",
       "properties": [
         {
@@ -17,7 +17,9 @@
         {
           "id": "2:6645462956379585365",
           "name": "detectedSpecies",
-          "type": 9
+          "indexId": "1:3364621497817555364",
+          "type": 9,
+          "flags": 2048
         },
         {
           "id": "3:4401627387603802866",
@@ -58,13 +60,33 @@
           "id": "10:8980115788730082750",
           "name": "isCloudVerified",
           "type": 1
+        },
+        {
+          "id": "11:6495622722161272095",
+          "name": "wantsNotifyV2",
+          "type": 1
+        },
+        {
+          "id": "12:4351663552005870650",
+          "name": "isTracked",
+          "type": 1
+        },
+        {
+          "id": "13:4404123203058002633",
+          "name": "photoPath",
+          "type": 9
+        },
+        {
+          "id": "14:406357433156011560",
+          "name": "createdAt",
+          "type": 6
         }
       ],
       "relations": []
     }
   ],
   "lastEntityId": "1:8039897946384294131",
-  "lastIndexId": "0:0",
+  "lastIndexId": "1:3364621497817555364",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

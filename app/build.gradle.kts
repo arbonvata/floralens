@@ -42,6 +42,9 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests.all { it.useJUnitPlatform() }
+    }
 }
 
 dependencies {
@@ -60,7 +63,9 @@ dependencies {
     kapt(libs.io.objectbox.processor)
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
-    testImplementation(libs.junit)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.mockk)
+    testRuntimeOnly(libs.junit.platform.launcher)
     // androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
