@@ -7,11 +7,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arbon.vata.floralens.data.objectbox.PlantRecord
+import com.arbon.vata.floralens.presentation.testdata.tomatoEarlyBlight
 
 
 @Composable
 fun ResultSupportedScreen(
-    record: PlantRecord = PlantRecord(detectedSpecies = "Tomato", commonName = "Tomato", diseaseName = "Early_blight", isHealthy = false, confidence = 0.82f, onDeviceLabel = "Tomato___Early_blight", isSupported = true),
+    record: PlantRecord = tomatoEarlyBlight,
     needsCloud: Boolean = false,
     onSaveClick: () -> Unit = {},
     onTrackClick: () -> Unit = {},

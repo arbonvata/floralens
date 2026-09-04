@@ -6,8 +6,10 @@ import com.arbon.vata.floralens.data.objectbox.PlantRecord
 import com.arbon.vata.floralens.data.objectbox.PlantRecord_
 import com.arbon.vata.floralens.data.photos.ScanPhotoStore
 import io.objectbox.Box
+import io.objectbox.kotlin.flow
 import io.objectbox.query.QueryBuilder
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 /**
@@ -40,6 +42,13 @@ class PlantRecordRepository(
                 .build()
                 .find()
         }
+
+    /** Re-emits the newest-first list on every ObjectBox change, so new scans appear live. */
+    fun observeAll(): Flow<List<PlantRecord>> =
+        plantRecordBox.query()
+            .order(PlantRecord_.createdAt, QueryBuilder.DESCENDING)
+            .build()
+            .flow()
 
     private suspend fun put(record: PlantRecord, photoPath: String?): PlantRecord =
         withContext(Dispatchers.IO) {

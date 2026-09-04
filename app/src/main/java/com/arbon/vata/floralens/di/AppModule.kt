@@ -2,9 +2,9 @@ package com.arbon.vata.floralens.di
 
 import com.arbon.vata.floralens.data.objectbox.MyObjectBox
 import com.arbon.vata.floralens.data.objectbox.PlantRecord
-
-import com.arbon.vata.floralens.data.repository.PlantRecordRepository
 import com.arbon.vata.floralens.data.photos.ScanPhotoStore
+import com.arbon.vata.floralens.data.repository.OnboardingRepository
+import com.arbon.vata.floralens.data.repository.PlantRecordRepository
 import com.arbon.vata.floralens.presentation.viewmodel.PlantViewModel
 import io.objectbox.Box
 import io.objectbox.BoxStore
@@ -35,7 +35,14 @@ val appModule =
             )
         }
 
+        single {
+            OnboardingRepository(androidContext())
+        }
+
         viewModel {
-            PlantViewModel(plantRecordRepository = get())
+            PlantViewModel(
+                plantRecordRepository = get(),
+                onboardingRepository = get(),
+            )
         }
     }
