@@ -2,6 +2,7 @@ package com.arbon.vata.floralens.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.arbon.vata.floralens.data.objectbox.PlantRecord
+import io.objectbox.Box
 
 sealed class ScanState {
     object Idle : ScanState()                          // Nothing happening
@@ -18,6 +19,8 @@ sealed class ScanState {
     ) : ScanState()
 }
 
-class PlantViewModel: ViewModel() {
+class PlantViewModel(
+    private val plantRecordBox: Box<PlantRecord>,
+) : ViewModel() {
 
 }

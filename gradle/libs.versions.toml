@@ -12,6 +12,7 @@ navigationCompose = "2.10.2"
 
 ktlint = "12.1.2"
 objectbox = "5.4.2"
+koin = "4.0.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -30,6 +31,8 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 androidx-compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
 io-objectbox-android = { module = "io.objectbox:objectbox-android", version.ref = "objectbox" }
 io-objectbox-kotlin = { module = "io.objectbox:objectbox-kotlin", version.ref = "objectbox" }
 io-objectbox-processor = { module = "io.objectbox:objectbox-processor", version.ref = "objectbox" }
@@ -37,7 +40,6 @@ objectbox-gradle-plugin = { module = "io.objectbox:objectbox-gradle-plugin", ver
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+android-legacy-kapt = { id = "com.android.legacy-kapt", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-

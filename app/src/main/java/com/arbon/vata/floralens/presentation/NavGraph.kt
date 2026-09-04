@@ -1,7 +1,6 @@
 package com.arbon.vata.floralens.presentation
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -16,6 +15,7 @@ import com.arbon.vata.floralens.presentation.screens.ResultUnsupportedScreen
 import com.arbon.vata.floralens.presentation.screens.SupportedPlantsScreen
 import com.arbon.vata.floralens.presentation.viewmodel.PlantViewModel
 import com.arbon.vata.floralens.presentation.viewmodel.ScanState
+import org.koin.androidx.compose.koinViewModel
 
 
 sealed class Screen(val route: String) {
@@ -31,7 +31,7 @@ sealed class Screen(val route: String) {
 
 @Composable
 fun PlantDoctorNavGraph(
-    vm: PlantViewModel = viewModel()
+    vm: PlantViewModel = koinViewModel()
 ) {
     val navController = rememberNavController()
 

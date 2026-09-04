@@ -1,0 +1,77 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:8039897946384294131",
+      "lastPropertyId": "10:8980115788730082750",
+      "name": "PlantRecord",
+      "properties": [
+        {
+          "id": "1:717842818467124357",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6645462956379585365",
+          "name": "detectedSpecies",
+          "type": 9
+        },
+        {
+          "id": "3:4401627387603802866",
+          "name": "commonName",
+          "type": 9
+        },
+        {
+          "id": "4:2588066256901668334",
+          "name": "diseaseName",
+          "type": 9
+        },
+        {
+          "id": "5:659190030382863841",
+          "name": "isHealthy",
+          "type": 1
+        },
+        {
+          "id": "6:885770837208082454",
+          "name": "confidence",
+          "type": 7
+        },
+        {
+          "id": "7:2927142140635830076",
+          "name": "onDeviceLabel",
+          "type": 9
+        },
+        {
+          "id": "8:8368197202552000766",
+          "name": "cloudLabel",
+          "type": 9
+        },
+        {
+          "id": "9:2094916913266919852",
+          "name": "isSupported",
+          "type": 1
+        },
+        {
+          "id": "10:8980115788730082750",
+          "name": "isCloudVerified",
+          "type": 1
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "1:8039897946384294131",
+  "lastIndexId": "0:0",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}
