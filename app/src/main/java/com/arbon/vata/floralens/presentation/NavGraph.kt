@@ -34,7 +34,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.arbon.vata.floralens.data.objectbox.PlantRecord
 import com.arbon.vata.floralens.data.photos.ScanPhotoStore
 import com.arbon.vata.floralens.presentation.screens.AnalyzingScreen
 import com.arbon.vata.floralens.presentation.screens.AnalyzingStep
@@ -74,14 +73,6 @@ private val tabs =
         TabDestination(Screen.Camera, "Scan", Icons.Filled.PhotoCamera),
         TabDestination(Screen.History, "History", Icons.Filled.History),
         TabDestination(Screen.MyPlants, "My Plants", Icons.Filled.Eco),
-    )
-
-/** Placeholder record until the TFLite classifier assigns real labels in the scan pipeline. */
-private fun pendingScanRecord() =
-    PlantRecord(
-        detectedSpecies = "Unknown",
-        onDeviceLabel = "pending_classification",
-        confidence = 0f,
     )
 
 @Composable
@@ -138,11 +129,11 @@ fun PlantDoctorNavGraph(
             composable(Screen.Camera.route) {
                 CameraScreen(
                     onPhotoCaptured = { bitmap ->
-                        vm.saveScan(bitmap, pendingScanRecord())
+                        vm.scan(bitmap)
                         navController.navigate(Screen.Analyzing.route)
                     },
                     onPhotoPicked = { uri ->
-                        vm.saveScan(uri, pendingScanRecord())
+                        vm.scan(uri)
                         navController.navigate(Screen.Analyzing.route)
                     },
                 )
@@ -151,17 +142,17 @@ fun PlantDoctorNavGraph(
             composable(Screen.Analyzing.route) {
                 val state by vm.scanState.collectAsState()
 
-                // Until the TFLite classifier lands, saving the scan completes the flow:
-                // Analyzing shows the spinner and lands on History once the record is stored.
                 LaunchedEffect(state) {
                     val destination =
                         when (state) {
+                            is ScanState.OnDeviceResult -> Screen.ResultSupported
                             is ScanState.Saved -> Screen.History
                             else -> null
                         }
                     if (destination != null) {
                         navController.navigate(destination.route) {
                             popUpTo(Screen.Camera.route)
+                            launchSingleTop = true
                         }
                     }
                 }
@@ -178,21 +169,24 @@ fun PlantDoctorNavGraph(
                                     AnalyzingStep.ON_DEVICE
                                 },
                         )
-                    is ScanState.CloudResult, is ScanState.Unsupported, is ScanState.Saved, ScanState.Idle ->
-                        AnalyzingScreen()
+                    else -> AnalyzingScreen()
                 }
             }
 
             composable(Screen.ResultSupported.route) {
-                val state = ScanState.Scanning  // just to compile - replace with vm.state
-                val current = null
-                if(current != null) {
+                val state by vm.scanState.collectAsState()
+                val result = state as? ScanState.OnDeviceResult
+                val record = result?.record
+                if (record != null) {
                     ResultSupportedScreen(
-                        record = current,
-                        needsCloud = (state as? ScanState.CloudResult) != null,
+                        record = record,
+                        needsCloud = result.needsCloud,
                         onSaveClick = { navController.navigate(Screen.History.route) },
-                        onTrackClick = { navController.navigate(Screen.MyPlants.route) },
-                        onCorrectClick = { /* open correction dialog -> update ObjectBox */ }
+                        onTrackClick = {
+                            vm.toggleTracked(record)
+                            navController.navigate(Screen.MyPlants.route)
+                        },
+                        onCorrectClick = { /* open correction dialog -> update ObjectBox */ },
                     )
                 }
             }

@@ -47,7 +47,7 @@ fun ResultSupportedScreen(
             Text("• Malmö weather: Don't water today, rain tomorrow")
         }}
         Spacer(Modifier.weight(1f))
-        Button(onClick = onSaveClick, modifier = Modifier.fillMaxWidth()) { Text("Save to History (ObjectBox)") }
+        Button(onClick = onSaveClick, modifier = Modifier.fillMaxWidth()) { Text("View in History") }
         Spacer(Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
             OutlinedButton(onClick = onTrackClick, modifier = Modifier.weight(1f)) { Text("Track plant") }

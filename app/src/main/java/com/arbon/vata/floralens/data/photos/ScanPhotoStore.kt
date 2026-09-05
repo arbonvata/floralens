@@ -2,6 +2,7 @@ package com.arbon.vata.floralens.data.photos
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import java.io.File
 import java.io.FileOutputStream
@@ -33,6 +34,9 @@ class ScanPhotoStore(
     }
 
     fun file(relativePath: String): File = File(context.filesDir, relativePath)
+
+    /** Decodes a picked image for classification; null when the Uri is unreadable. */
+    fun decode(uri: Uri): Bitmap? = context.contentResolver.openInputStream(uri)?.use(BitmapFactory::decodeStream)
 
     private fun newPhotoFile(extension: String = "jpg"): File {
         val dir = File(context.filesDir, PHOTO_DIR).apply { mkdirs() }

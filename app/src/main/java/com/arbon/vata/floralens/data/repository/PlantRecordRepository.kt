@@ -32,6 +32,10 @@ class PlantRecordRepository(
         return put(record.copy(id = 0), photoPath)
     }
 
+    /** Decodes a gallery Uri into a bitmap for classification; null if unreadable. */
+    suspend fun decode(photoUri: Uri): Bitmap? =
+        withContext(Dispatchers.IO) { photoStore.decode(photoUri) }
+
     /** Upsert for records without a new photo, e.g. "Notify me" wishlist entries or flag updates. */
     suspend fun save(record: PlantRecord): PlantRecord = put(record, photoPath = null)
 

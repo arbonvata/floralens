@@ -5,6 +5,9 @@ import com.arbon.vata.floralens.data.objectbox.PlantRecord
 import com.arbon.vata.floralens.data.photos.ScanPhotoStore
 import com.arbon.vata.floralens.data.repository.OnboardingRepository
 import com.arbon.vata.floralens.data.repository.PlantRecordRepository
+import com.arbon.vata.floralens.domain.classifier.CascadeClassifier
+import com.arbon.vata.floralens.domain.classifier.FakePlantClassifier
+import com.arbon.vata.floralens.domain.classifier.PlantClassifier
 import com.arbon.vata.floralens.presentation.viewmodel.PlantViewModel
 import io.objectbox.Box
 import io.objectbox.BoxStore
@@ -39,10 +42,20 @@ val appModule =
             OnboardingRepository(androidContext())
         }
 
+        // Swap to the LiteRT implementation when plant_village.tflite ships.
+        single<PlantClassifier> {
+            FakePlantClassifier()
+        }
+
+        single {
+            CascadeClassifier(get())
+        }
+
         viewModel {
             PlantViewModel(
                 plantRecordRepository = get(),
                 onboardingRepository = get(),
+                cascadeClassifier = get(),
             )
         }
     }
