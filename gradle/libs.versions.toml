@@ -9,6 +9,10 @@ kotlin = "2.2.10"
 composeBom = "2026.02.01"
 navigationCompose = "2.10.2"
 camerax = "1.6.2"
+# LiteRT 1.4.2 = newest classic org.tensorflow.lite API. LiteRT 2.x moved to a new
+# runtime API and 2.1+ ships Kotlin 2.3/2.4 metadata unreadable by AGP 9.4's
+# built-in Kotlin 2.2 compiler.
+litert = "1.4.2"
 
 ktlint = "12.1.2"
 objectbox = "5.4.2"
@@ -38,6 +42,7 @@ androidx-camera-core = { group = "androidx.camera", name = "camera-core", versio
 androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
+litert = { group = "com.google.ai.edge.litert", name = "litert", version.ref = "litert" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
 junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version.ref = "junitJupiter" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }

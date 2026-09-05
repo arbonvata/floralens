@@ -8,6 +8,7 @@ import com.arbon.vata.floralens.data.repository.PlantRecordRepository
 import com.arbon.vata.floralens.domain.classifier.CascadeClassifier
 import com.arbon.vata.floralens.domain.classifier.FakePlantClassifier
 import com.arbon.vata.floralens.domain.classifier.PlantClassifier
+import com.arbon.vata.floralens.domain.classifier.TFLitePlantClassifier
 import com.arbon.vata.floralens.presentation.viewmodel.PlantViewModel
 import io.objectbox.Box
 import io.objectbox.BoxStore
@@ -42,9 +43,9 @@ val appModule =
             OnboardingRepository(androidContext())
         }
 
-        // Swap to the LiteRT implementation when plant_village.tflite ships.
+        // Real LiteRT model from assets; FakePlantClassifier stays for previews/tests.
         single<PlantClassifier> {
-            FakePlantClassifier()
+            TFLitePlantClassifier(androidContext())
         }
 
         single {

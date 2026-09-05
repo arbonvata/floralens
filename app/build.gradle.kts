@@ -42,6 +42,9 @@ android {
     buildFeatures {
         compose = true
     }
+    androidResources {
+        noCompress += "tflite"
+    }
     testOptions {
         unitTests.all { it.useJUnitPlatform() }
     }
@@ -66,6 +69,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.io.objectbox.android)
     implementation(libs.io.objectbox.kotlin)
+    implementation(libs.litert)
     kapt(libs.io.objectbox.processor)
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
