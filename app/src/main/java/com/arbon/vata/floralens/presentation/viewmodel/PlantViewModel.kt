@@ -54,6 +54,7 @@ class PlantViewModel(
 
     fun saveScan(photo: Bitmap, record: PlantRecord) {
         viewModelScope.launch {
+            _scanState.update { ScanState.Scanning }
             val saved = plantRecordRepository.saveScan(photo, record)
             _scanState.update { ScanState.Saved(saved) }
         }
@@ -61,6 +62,7 @@ class PlantViewModel(
 
     fun saveScan(photoUri: Uri, record: PlantRecord) {
         viewModelScope.launch {
+            _scanState.update { ScanState.Scanning }
             val saved = plantRecordRepository.saveScan(photoUri, record)
             _scanState.update { ScanState.Saved(saved) }
         }

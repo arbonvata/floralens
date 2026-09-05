@@ -18,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +34,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.arbon.vata.floralens.data.objectbox.PlantRecord
 import com.arbon.vata.floralens.data.photos.ScanPhotoStore
 import com.arbon.vata.floralens.presentation.screens.AnalyzingScreen
 import com.arbon.vata.floralens.presentation.screens.AnalyzingStep
@@ -72,6 +74,14 @@ private val tabs =
         TabDestination(Screen.Camera, "Scan", Icons.Filled.PhotoCamera),
         TabDestination(Screen.History, "History", Icons.Filled.History),
         TabDestination(Screen.MyPlants, "My Plants", Icons.Filled.Eco),
+    )
+
+/** Placeholder record until the TFLite classifier assigns real labels in the scan pipeline. */
+private fun pendingScanRecord() =
+    PlantRecord(
+        detectedSpecies = "Unknown",
+        onDeviceLabel = "pending_classification",
+        confidence = 0f,
     )
 
 @Composable
@@ -127,41 +137,49 @@ fun PlantDoctorNavGraph(
 
             composable(Screen.Camera.route) {
                 CameraScreen(
-                    onShutterClick = {
+                    onPhotoCaptured = { bitmap ->
+                        vm.saveScan(bitmap, pendingScanRecord())
                         navController.navigate(Screen.Analyzing.route)
-                        // In real app: vm.scan(bitmap, path) called from CameraX callback
                     },
-                    onGalleryClick = { /* open gallery -> vm.scan() */ }
+                    onPhotoPicked = { uri ->
+                        vm.saveScan(uri, pendingScanRecord())
+                        navController.navigate(Screen.Analyzing.route)
+                    },
                 )
             }
 
             composable(Screen.Analyzing.route) {
-                val state = ScanState.Scanning  // just to compile - replace with vm.state
+                val state by vm.scanState.collectAsState()
 
-                // Observe vm.state
-                when(val s = state) {
-                    is ScanState.Scanning -> AnalyzingScreen(step = AnalyzingStep.ON_DEVICE)
-                    is ScanState.OnDeviceResult -> {
-                        if(s.needsCloud) {
-                            AnalyzingScreen(step = AnalyzingStep.SECOND_OPINION)
-                            // After cloud call, vm will emit CloudResult
-                        } else {
-                            navController.navigate(Screen.ResultSupported.route) {
-                                popUpTo(Screen.Camera.route)
-                            }
+                // Until the TFLite classifier lands, saving the scan completes the flow:
+                // Analyzing shows the spinner and lands on History once the record is stored.
+                LaunchedEffect(state) {
+                    val destination =
+                        when (state) {
+                            is ScanState.Saved -> Screen.History
+                            else -> null
                         }
-                    }
-                    is ScanState.CloudResult -> {
-                        navController.navigate(Screen.ResultSupported.route) {
+                    if (destination != null) {
+                        navController.navigate(destination.route) {
                             popUpTo(Screen.Camera.route)
                         }
                     }
-                    is ScanState.Unsupported -> {
-                        navController.navigate(Screen.ResultUnsupported.route) {
-                            popUpTo(Screen.Camera.route)
-                        }
-                    }
-                    else -> AnalyzingScreen()
+                }
+
+                when (val s = state) {
+                    is ScanState.Scanning ->
+                        AnalyzingScreen(step = AnalyzingStep.ON_DEVICE)
+                    is ScanState.OnDeviceResult ->
+                        AnalyzingScreen(
+                            step =
+                                if (s.needsCloud) {
+                                    AnalyzingStep.SECOND_OPINION
+                                } else {
+                                    AnalyzingStep.ON_DEVICE
+                                },
+                        )
+                    is ScanState.CloudResult, is ScanState.Unsupported, is ScanState.Saved, ScanState.Idle ->
+                        AnalyzingScreen()
                 }
             }
 
