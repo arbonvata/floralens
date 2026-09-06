@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -288,7 +287,12 @@ private fun FloraLensBottomBar(
                 selected = selected,
                 onClick = {
                     navController.navigate(tab.screen.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
+                        // Pop to the Camera destination rather than the graph's
+                        // start destination: in the first session that is the
+                        // already-popped Onboarding, and popping to it is a no-op
+                        // that breaks returning to the Scan tab. Camera is the
+                        // tab-stack root in every flow.
+                        popUpTo(Screen.Camera.route) {
                             saveState = true
                         }
                         launchSingleTop = true
