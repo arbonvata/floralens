@@ -9,6 +9,7 @@ import com.arbon.vata.floralens.data.repository.OnboardingRepository
 import com.arbon.vata.floralens.data.repository.PlantRecordRepository
 import com.arbon.vata.floralens.domain.classifier.CascadeClassifier
 import com.arbon.vata.floralens.domain.classifier.PlantLabels
+import com.arbon.vata.floralens.domain.diagnosis.DiseaseVerifier
 import com.arbon.vata.floralens.domain.species.SpeciesIdentifier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -42,6 +43,7 @@ class PlantViewModel(
     private val onboardingRepository: OnboardingRepository,
     private val cascadeClassifier: CascadeClassifier,
     private val speciesIdentifier: SpeciesIdentifier,
+    private val diseaseVerifier: DiseaseVerifier,
 ) : ViewModel() {
 
     /** Read once when the nav graph is built: decides whether Onboarding or the Scan tab starts. */
@@ -60,9 +62,11 @@ class PlantViewModel(
 
     /**
      * Full cascade pipeline: classify on-device, persist the scan with its photo,
-     * then — when the gate is unsure — get a free Pl@ntNet species opinion that
-     * either verifies the crop, redirects to a v2.0 wishlist species, or
-     * (offline / no key) leaves the on-device result as the final verdict.
+     * then — when the gate is unsure — run the cloud second opinions. Pl@ntNet
+     * verifies the species or redirects Banana/Avocado/Mango to the v2.0
+     * wishlist flow; Plant.id then confirms or corrects the disease verdict.
+     * Unavailable cloud stages (offline / no key) leave the on-device result as
+     * the final, unverified verdict.
      */
     fun scan(photo: Bitmap) {
         viewModelScope.launch {
@@ -88,42 +92,61 @@ class PlantViewModel(
                 return@launch
             }
 
-            // Needs second opinion: show that step, then merge the cloud answer.
+            // Needs second opinion: show that step, then merge the cloud answers.
             _scanState.update { ScanState.OnDeviceResult(record, needsCloud = true) }
-            when (val match = speciesIdentifier.identify(photo)) {
-                // Offline, no API key or no usable match: the on-device verdict
-                // stands, unverified — shown with needsCloud context on the result.
-                null ->
-                    _scanState.update { ScanState.CloudResult(record) }
-                else ->
-                    if (match.isSupported) {
-                        // Cloud agrees the crop is supported: verify the record and
-                        // keep the higher of the two confidences.
-                        record =
-                            plantRecordRepository.save(
-                                record.copy(
-                                    cloudLabel = match.scientificName,
-                                    isCloudVerified = true,
-                                    confidence = maxOf(record.confidence, match.confidence),
-                                ),
-                            )
-                        _scanState.update { ScanState.CloudResult(record) }
-                    } else {
-                        // Species outside v1.0 (Banana/Avocado/Mango): rewrite the
-                        // record as an unsupported scan feeding the v2.0 wishlist.
-                        record =
-                            plantRecordRepository.save(
-                                record.copy(
-                                    detectedSpecies = match.commonName,
-                                    commonName = match.commonName,
-                                    cloudLabel = match.scientificName,
-                                    isSupported = false,
-                                    isCloudVerified = true,
-                                ),
-                            )
-                        _scanState.update { ScanState.Unsupported(match.commonName, record) }
-                    }
+            val speciesMatch = speciesIdentifier.identify(photo)
+            if (speciesMatch != null && !speciesMatch.isSupported) {
+                // Species outside v1.0 (Banana/Avocado/Mango): rewrite the
+                // record as an unsupported scan feeding the v2.0 wishlist.
+                record =
+                    plantRecordRepository.save(
+                        record.copy(
+                            detectedSpecies = speciesMatch.commonName,
+                            commonName = speciesMatch.commonName,
+                            cloudLabel = speciesMatch.scientificName,
+                            isSupported = false,
+                            isCloudVerified = true,
+                        ),
+                    )
+                _scanState.update { ScanState.Unsupported(speciesMatch.commonName, record) }
+                return@launch
             }
+
+            if (speciesMatch != null) {
+                // Cloud agrees the crop is supported: verify the species on the
+                // record and keep the higher of the two confidences.
+                record =
+                    plantRecordRepository.save(
+                        record.copy(
+                            cloudLabel = speciesMatch.scientificName,
+                            isCloudVerified = true,
+                            confidence = maxOf(record.confidence, speciesMatch.confidence),
+                        ),
+                    )
+            }
+
+            // Disease-level second opinion (Plant.id): confirms or corrects the
+            // on-device disease verdict. Runs even when Pl@ntNet was unavailable
+            // — the keys are independent and only the gate decides cost.
+            val assessment = diseaseVerifier.assess(photo)
+            if (assessment != null) {
+                record =
+                    plantRecordRepository.save(
+                        record.copy(
+                            isHealthy = assessment.isHealthy,
+                            diseaseName =
+                                if (assessment.isHealthy) {
+                                    null
+                                } else {
+                                    assessment.diseaseName ?: record.diseaseName
+                                },
+                            cloudLabel = assessment.diseaseName ?: "Healthy",
+                            isCloudVerified = true,
+                            confidence = maxOf(record.confidence, assessment.confidence),
+                        ),
+                    )
+            }
+            _scanState.update { ScanState.CloudResult(record) }
         }
     }
 
