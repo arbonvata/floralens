@@ -4,12 +4,14 @@ import com.arbon.vata.floralens.BuildConfig
 import com.arbon.vata.floralens.data.objectbox.MyObjectBox
 import com.arbon.vata.floralens.data.objectbox.PlantRecord
 import com.arbon.vata.floralens.data.photos.ScanPhotoStore
+import com.arbon.vata.floralens.data.plantid.PlantIdClient
 import com.arbon.vata.floralens.data.plantnet.PlantNetClient
 import com.arbon.vata.floralens.data.repository.OnboardingRepository
 import com.arbon.vata.floralens.data.repository.PlantRecordRepository
 import com.arbon.vata.floralens.domain.classifier.CascadeClassifier
 import com.arbon.vata.floralens.domain.classifier.PlantClassifier
 import com.arbon.vata.floralens.domain.classifier.TFLitePlantClassifier
+import com.arbon.vata.floralens.domain.diagnosis.DiseaseVerifier
 import com.arbon.vata.floralens.domain.species.SpeciesIdentifier
 import com.arbon.vata.floralens.presentation.viewmodel.PlantViewModel
 import io.ktor.client.HttpClient
@@ -87,6 +89,15 @@ val appModule =
             )
         }
 
+        // --- Plant.id disease second opinion ---
+        // Same pattern: blank key disables assess() and the on-device verdict stands.
+        single<DiseaseVerifier> {
+            PlantIdClient(
+                client = get(),
+                apiKey = BuildConfig.PLANT_ID_API_KEY,
+            )
+        }
+
         // --- Presentation ---
         viewModel {
             PlantViewModel(
@@ -94,6 +105,7 @@ val appModule =
                 onboardingRepository = get(),
                 cascadeClassifier = get(),
                 speciesIdentifier = get(),
+                diseaseVerifier = get(),
             )
         }
     }

@@ -8,12 +8,15 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
-val plantNetApiKey: String =
+fun localProperty(name: String): String =
     runCatching {
         Properties().also { props ->
             rootProject.file("local.properties").inputStream().use(props::load)
-        }.getProperty("PLANTNET_API_KEY", "")
+        }.getProperty(name, "")
     }.getOrDefault("")
+
+val plantNetApiKey: String = localProperty("PLANTNET_API_KEY")
+val plantIdApiKey: String = localProperty("PLANT_ID_API_KEY")
 
 apply(plugin = "io.objectbox")
 
@@ -37,6 +40,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "PLANTNET_API_KEY", "\"$plantNetApiKey\"")
+        buildConfigField("String", "PLANT_ID_API_KEY", "\"$plantIdApiKey\"")
     }
 
     buildTypes {

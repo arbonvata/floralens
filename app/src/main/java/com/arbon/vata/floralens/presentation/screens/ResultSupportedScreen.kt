@@ -33,7 +33,15 @@ fun ResultSupportedScreen(
                 LinearProgressIndicator(progress = {record.confidence}, modifier = Modifier.fillMaxWidth().padding(top=8.dp))
                 if(needsCloud) {
                     Spacer(Modifier.height(8.dp))
-                    Text("Updated via Pl@ntNet second opinion: Septoria more likely than Early Blight (spots circular, not concentric).", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                    Text(
+                        text = if (record.isCloudVerified && record.cloudLabel != null) {
+                            "Cloud second opinion: ${record.cloudLabel}"
+                        } else {
+                            "Cloud second opinion unavailable - showing on-device result"
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
                 }
             }
         }
