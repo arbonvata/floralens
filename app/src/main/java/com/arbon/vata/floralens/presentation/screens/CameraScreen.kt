@@ -1,11 +1,14 @@
 package com.arbon.vata.floralens.presentation.screens
 
 import android.Manifest
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,9 +37,11 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,7 +51,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 
 @Composable
 fun CameraScreen(
@@ -54,15 +63,47 @@ fun CameraScreen(
     onPhotoPicked: (Uri) -> Unit = {},
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     var hasCameraPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
                     PackageManager.PERMISSION_GRANTED,
         )
     }
+
+    /** Set once the system marks us "don't ask again" — only Settings can grant then. */
+    var permanentlyDenied by rememberSaveable { mutableStateOf(false) }
+
+    // Granting from the system Settings page fires no callback we can hook, so
+    // re-check the permission every time the screen resumes.
+    DisposableEffect(lifecycleOwner) {
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    val granted =
+                        ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
+                                PackageManager.PERMISSION_GRANTED
+                    if (granted) {
+                        hasCameraPermission = true
+                        permanentlyDenied = false
+                    }
+                }
+            }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     val permissionLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             hasCameraPermission = granted
+            if (!granted) {
+                // After a real denial, "no rationale wanted" means the user picked
+                // Don't ask again — the in-app dialog can never appear again.
+                permanentlyDenied =
+                    (context as? Activity)
+                        ?.let { !ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.CAMERA) }
+                        ?: false
+            }
         }
     val galleryLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -87,13 +128,30 @@ fun CameraScreen(
                 Text("📷", style = MaterialTheme.typography.displayLarge)
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    "Camera permission needed to diagnose your plants",
+                    if (permanentlyDenied) {
+                        "Camera access was declined. Enable it in Settings to scan live."
+                    } else {
+                        "Camera permission needed to diagnose your plants"
+                    },
                     color = Color.White,
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Spacer(Modifier.height(16.dp))
-                Button(onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) }) {
-                    Text("Grant camera access")
+                Button(
+                    onClick = {
+                        if (permanentlyDenied) {
+                            context.startActivity(
+                                Intent(
+                                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    Uri.fromParts("package", context.packageName, null),
+                                ),
+                            )
+                        } else {
+                            permissionLauncher.launch(Manifest.permission.CAMERA)
+                        }
+                    },
+                ) {
+                    Text(if (permanentlyDenied) "Open settings" else "Grant camera access")
                 }
                 Spacer(Modifier.height(8.dp))
                 FilledTonalButton(

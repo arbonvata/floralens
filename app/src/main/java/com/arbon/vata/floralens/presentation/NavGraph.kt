@@ -142,10 +142,14 @@ fun PlantDoctorNavGraph(
             composable(Screen.Analyzing.route) {
                 val state by vm.scanState.collectAsState()
 
+                // OnDeviceResult with needsCloud is the intermediate "second
+                // opinion in flight" state, not a navigation trigger.
                 LaunchedEffect(state) {
                     val destination =
-                        when (state) {
-                            is ScanState.OnDeviceResult -> Screen.ResultSupported
+                        when (val s = state) {
+                            is ScanState.OnDeviceResult if (!s.needsCloud) -> Screen.ResultSupported
+                            is ScanState.CloudResult -> Screen.ResultSupported
+                            is ScanState.Unsupported -> Screen.ResultUnsupported
                             is ScanState.Saved -> Screen.History
                             else -> null
                         }
@@ -158,7 +162,7 @@ fun PlantDoctorNavGraph(
                 }
 
                 when (val s = state) {
-                    is ScanState.Scanning ->
+                    is ScanState.Scanning, ScanState.Idle ->
                         AnalyzingScreen(step = AnalyzingStep.ON_DEVICE)
                     is ScanState.OnDeviceResult ->
                         AnalyzingScreen(
@@ -169,18 +173,22 @@ fun PlantDoctorNavGraph(
                                     AnalyzingStep.ON_DEVICE
                                 },
                         )
-                    else -> AnalyzingScreen()
+                    else -> AnalyzingScreen(step = AnalyzingStep.SECOND_OPINION)
                 }
             }
 
             composable(Screen.ResultSupported.route) {
                 val state by vm.scanState.collectAsState()
-                val result = state as? ScanState.OnDeviceResult
-                val record = result?.record
+                val record =
+                    when (val s = state) {
+                        is ScanState.OnDeviceResult -> s.record
+                        is ScanState.CloudResult -> s.record
+                        else -> null
+                    }
                 if (record != null) {
                     ResultSupportedScreen(
                         record = record,
-                        needsCloud = result.needsCloud,
+                        needsCloud = state is ScanState.CloudResult,
                         onSaveClick = { navController.navigate(Screen.History.route) },
                         onTrackClick = {
                             vm.toggleTracked(record)
@@ -192,19 +200,19 @@ fun PlantDoctorNavGraph(
             }
 
             composable(Screen.ResultUnsupported.route) {
-                val state = ScanState.Scanning  // just to compile - replace with vm.state
-                val species = (state as? ScanState.Unsupported)?.species ?: "Banana"
+                val state by vm.scanState.collectAsState()
+                val unsupported = state as? ScanState.Unsupported
                 ResultUnsupportedScreen(
-                    species = species,
+                    species = unsupported?.species ?: "",
                     onNotifyClick = {
-                        // vm.save wishlist record (wantsNotifyV2 = true)
+                        vm.requestV2Notify(unsupported)
                         navController.navigate(Screen.History.route)
                     },
                     onCareTipsClick = { /* call Trefle API */ },
                     onSecondOpinionClick = {
                         navController.navigate(Screen.Analyzing.route)
                         // vm.scanWithCloud()
-                    }
+                    },
                 )
             }
 
