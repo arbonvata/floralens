@@ -8,6 +8,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arbon.vata.floralens.data.objectbox.PlantRecord
 import com.arbon.vata.floralens.presentation.testdata.tomatoEarlyBlight
+import com.arbon.vata.floralens.presentation.testdata.tomatoEarlyBlightCloudVerified
 
 
 @Composable
@@ -26,7 +27,7 @@ fun ResultSupportedScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     AssistChip(onClick = {}, label = { Text(if(record.isHealthy) "Healthy" else "Sick") })
                     AssistChip(onClick = {}, label = { Text("${(record.confidence*100).toInt()}% confidence") })
-                    if(needsCloud) AssistChip(onClick = {}, label = { Text("Cloud verified") })
+                    if(record.isCloudVerified) AssistChip(onClick = {}, label = { Text("☁️ Cloud verified") })
                 }
                 Spacer(Modifier.height(8.dp))
                 Text("Result: ${record.diseaseName}", style = MaterialTheme.typography.titleMedium)
@@ -73,5 +74,5 @@ fun ResultSupportedPreview() {
 @Preview(showBackground = true, name = "Result - With Second Opinion")
 @Composable
 fun ResultWithCloudPreview() {
-    MaterialTheme { ResultSupportedScreen(needsCloud = true) }
+    MaterialTheme { ResultSupportedScreen(record = tomatoEarlyBlightCloudVerified, needsCloud = true) }
 }

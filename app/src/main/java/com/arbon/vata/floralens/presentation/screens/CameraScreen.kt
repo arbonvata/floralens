@@ -113,6 +113,7 @@ fun CameraScreen(
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         if (hasCameraPermission) {
             CameraContent(
+                lifecycleOwner = lifecycleOwner,
                 onPhotoCaptured = onPhotoCaptured,
                 onGalleryClick = {
                     galleryLauncher.launch(
@@ -170,13 +171,60 @@ fun CameraScreen(
 
 @Composable
 private fun CameraContent(
+    lifecycleOwner: androidx.lifecycle.LifecycleOwner,
     onPhotoCaptured: (Bitmap) -> Unit,
     onGalleryClick: () -> Unit,
 ) {
+    if (androidx.compose.ui.platform.LocalInspectionMode.current) {
+        Box(Modifier.fillMaxSize().background(Color.DarkGray)) {
+            // Leaf guide
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Box(
+                    Modifier
+                        .size(220.dp)
+                        .clip(MaterialTheme.shapes.large)
+                        .background(Color.White.copy(alpha = 0.08f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("🍃", style = MaterialTheme.typography.displayLarge)
+                }
+            }
+
+            // Top pill
+            Row(Modifier.align(Alignment.TopCenter).padding(top = 16.dp)) {
+                AssistChip(onClick = {}, label = { Text("14 plants supported offline • 40ms") })
+            }
+
+            // Bottom controls
+            Row(
+                Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(24.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                FilledTonalButton(onClick = onGalleryClick) { Text("Gallery") }
+                Button(
+                    onClick = {},
+                    modifier = Modifier.size(72.dp),
+                    shape = CircleShape,
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black,
+                        ),
+                ) { Text("📸") }
+                FilledTonalButton(onClick = {}) { Text("Flash") }
+            }
+        }
+        return
+    }
+
     val context = LocalContext.current
     val controller =
         remember {
             LifecycleCameraController(context).apply {
+                // PreviewView owns the surface, but the controller still needs an
+                // explicit lifecycle owner before it can bind a camera.
+                bindToLifecycle(lifecycleOwner)
                 setEnabledUseCases(CameraController.IMAGE_CAPTURE)
                 setImageCaptureFlashMode(ImageCapture.FLASH_MODE_OFF)
             }
