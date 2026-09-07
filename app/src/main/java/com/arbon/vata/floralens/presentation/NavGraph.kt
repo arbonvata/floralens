@@ -28,7 +28,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavType
 import androidx.navigation.NavHostController
+import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -54,8 +56,16 @@ sealed class Screen(val route: String) {
     object Supported : Screen("supported")
     object Camera : Screen("camera")
     object Analyzing : Screen("analyzing")
-    object ResultSupported : Screen("result_supported")
-    object ResultUnsupported : Screen("result_unsupported")
+    object ResultSupported : Screen("result_supported?recordId={recordId}") {
+        fun scanRoute() = "result_supported"
+
+        fun historyRoute(recordId: Long) = "result_supported?recordId=$recordId"
+    }
+    object ResultUnsupported : Screen("result_unsupported?recordId={recordId}") {
+        fun scanRoute() = "result_unsupported"
+
+        fun historyRoute(recordId: Long) = "result_unsupported?recordId=$recordId"
+    }
     object History : Screen("history")
     object MyPlants : Screen("my_plants")
 }
@@ -144,16 +154,16 @@ fun PlantDoctorNavGraph(
                 // OnDeviceResult with needsCloud is the intermediate "second
                 // opinion in flight" state, not a navigation trigger.
                 LaunchedEffect(state) {
-                    val destination =
+                    val destinationRoute =
                         when (val s = state) {
-                            is ScanState.OnDeviceResult if (!s.needsCloud) -> Screen.ResultSupported
-                            is ScanState.CloudResult -> Screen.ResultSupported
-                            is ScanState.Unsupported -> Screen.ResultUnsupported
-                            is ScanState.Saved -> Screen.History
+                            is ScanState.OnDeviceResult if (!s.needsCloud) -> Screen.ResultSupported.scanRoute()
+                            is ScanState.CloudResult -> Screen.ResultSupported.scanRoute()
+                            is ScanState.Unsupported -> Screen.ResultUnsupported.scanRoute()
+                            is ScanState.Saved -> Screen.History.route
                             else -> null
                         }
-                    if (destination != null) {
-                        navController.navigate(destination.route) {
+                    if (destinationRoute != null) {
+                        navController.navigate(destinationRoute) {
                             popUpTo(Screen.Camera.route)
                             launchSingleTop = true
                         }
@@ -176,18 +186,26 @@ fun PlantDoctorNavGraph(
                 }
             }
 
-            composable(Screen.ResultSupported.route) {
+            composable(
+                route = Screen.ResultSupported.route,
+                arguments = listOf(navArgument("recordId") { type = NavType.LongType; defaultValue = 0L }),
+            ) { entry ->
                 val state by vm.scanState.collectAsState()
-                val record =
+                val history by vm.history.collectAsState()
+                val recordId = entry.arguments?.getLong("recordId") ?: 0L
+                val record = if (recordId != 0L) {
+                    history.firstOrNull { it.id == recordId }
+                } else {
                     when (val s = state) {
                         is ScanState.OnDeviceResult -> s.record
                         is ScanState.CloudResult -> s.record
                         else -> null
                     }
+                }
                 if (record != null) {
                     ResultSupportedScreen(
                         record = record,
-                        needsCloud = state is ScanState.CloudResult,
+                        needsCloud = recordId == 0L && state is ScanState.CloudResult,
                         onSaveClick = { navController.navigate(Screen.History.route) },
                         onTrackClick = {
                             vm.toggleTracked(record)
@@ -198,16 +216,36 @@ fun PlantDoctorNavGraph(
                 }
             }
 
-            composable(Screen.ResultUnsupported.route) {
+            composable(
+                route = Screen.ResultUnsupported.route,
+                arguments = listOf(navArgument("recordId") { type = NavType.LongType; defaultValue = 0L }),
+            ) { entry ->
                 val state by vm.scanState.collectAsState()
+                val history by vm.history.collectAsState()
+                val recordId = entry.arguments?.getLong("recordId") ?: 0L
+                val historyRecord = if (recordId != 0L) history.firstOrNull { it.id == recordId } else null
                 val unsupported = state as? ScanState.Unsupported
-                val rec = unsupported?.record
+                val rec = if (recordId != 0L) historyRecord else unsupported?.record
+                val displayedUnsupported =
+                    if (recordId != 0L && historyRecord != null) {
+                        ScanState.Unsupported(
+                            species = historyRecord.commonName.ifEmpty { historyRecord.detectedSpecies },
+                            record = historyRecord,
+                        )
+                    } else {
+                        unsupported
+                    }
                 ResultUnsupportedScreen(
-                    species = unsupported?.species.orEmpty(),
+                    species =
+                        if (recordId != 0L) {
+                            historyRecord?.commonName?.ifEmpty { historyRecord.detectedSpecies }.orEmpty()
+                        } else {
+                            unsupported?.species.orEmpty()
+                        },
                     scientificName = rec?.cloudLabel ?: rec?.detectedSpecies ?: "",
                     confidence = rec?.confidence,
                     onNotifyClick = {
-                        vm.requestV2Notify(unsupported)
+                        vm.requestV2Notify(displayedUnsupported)
                         navController.navigate(Screen.History.route)
                     },
                     onCareTipsClick = { /* call Trefle API */ },
@@ -225,8 +263,11 @@ fun PlantDoctorNavGraph(
                     records = records,
                     resolvePhoto = { record -> record.photoPath?.let(photoStore::file) },
                     onItemClick = { record ->
-                        if (record.isSupported) navController.navigate(Screen.ResultSupported.route)
-                        else navController.navigate(Screen.ResultUnsupported.route)
+                        if (record.isSupported) {
+                            navController.navigate(Screen.ResultSupported.historyRoute(record.id))
+                        } else {
+                            navController.navigate(Screen.ResultUnsupported.historyRoute(record.id))
+                        }
                     },
                 )
             }
@@ -293,17 +334,24 @@ private fun FloraLensBottomBar(
             NavigationBarItem(
                 selected = selected,
                 onClick = {
-                    navController.navigate(tab.screen.route) {
-                        // Pop to the Camera destination rather than the graph's
-                        // start destination: in the first session that is the
-                        // already-popped Onboarding, and popping to it is a no-op
-                        // that breaks returning to the Scan tab. Camera is the
-                        // tab-stack root in every flow.
-                        popUpTo(Screen.Camera.route) {
-                            saveState = true
+                    if (!selected) {
+                        if (tab.screen == Screen.Camera) {
+                            // Return to the existing camera entry so its lifecycle
+                            // and CameraX controller resume together.
+                            if (!navController.popBackStack(Screen.Camera.route, inclusive = false)) {
+                                navController.navigate(Screen.Camera.route) {
+                                    launchSingleTop = true
+                                }
+                            }
+                        } else {
+                            navController.navigate(tab.screen.route) {
+                                // Camera is the tab stack root. Avoid saving and
+                                // restoring tab stacks so returning to Scan cannot
+                                // revive a stale destination state.
+                                popUpTo(Screen.Camera.route)
+                                launchSingleTop = true
+                            }
                         }
-                        launchSingleTop = true
-                        restoreState = true
                     }
                 },
                 icon = { Icon(tab.icon, contentDescription = tab.label) },
