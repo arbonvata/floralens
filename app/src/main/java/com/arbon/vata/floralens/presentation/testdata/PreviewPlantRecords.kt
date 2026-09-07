@@ -72,3 +72,27 @@ val historyPreviewRecords: List<PlantRecord> =
             createdAt = System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000L,
         ),
     )
+/** One tomato followed over three scans: blight onset, treatment, recovery. */
+val trackedPreviewRecords: List<PlantRecord> =
+    listOf(
+        tomatoEarlyBlight.copy(
+            id = 11,
+            isTracked = true,
+            confidence = 0.95f,
+            diseaseName = null,
+            isHealthy = true,
+            createdAt = System.currentTimeMillis() - 10 * 24 * 60 * 60 * 1000L,
+        ),
+        tomatoEarlyBlight.copy(
+            id = 12,
+            isTracked = true,
+            confidence = 0.65f,
+            createdAt = System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000L,
+        ),
+        tomatoEarlyBlightCloudVerified.copy(
+            id = 13,
+            isTracked = true,
+            createdAt = System.currentTimeMillis(),
+        ),
+        healthyApple.copy(id = 14, isTracked = true),
+    )

@@ -229,7 +229,11 @@ fun PlantDoctorNavGraph(
             }
 
             composable(Screen.MyPlants.route) {
-                MyPlantsScreen()
+                val tracked by vm.trackedPlants.collectAsState()
+                MyPlantsScreen(
+                    trackedRecords = tracked,
+                    onUntrackClick = { vm.untrackSpecies(it) },
+                )
             }
         }
     }

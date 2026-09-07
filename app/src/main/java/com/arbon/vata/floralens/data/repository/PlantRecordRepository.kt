@@ -9,6 +9,7 @@ import io.objectbox.Box
 import io.objectbox.kotlin.flow
 import io.objectbox.query.QueryBuilder
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
@@ -48,11 +49,35 @@ class PlantRecordRepository(
         }
 
     /** Re-emits the newest-first list on every ObjectBox change, so new scans appear live. */
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun observeAll(): Flow<List<PlantRecord>> =
         plantRecordBox.query()
             .order(PlantRecord_.createdAt, QueryBuilder.DESCENDING)
             .build()
             .flow()
+
+    /** Tracked scans, newest first — the raw feed for the My Plants timelines. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun observeTracked(): Flow<List<PlantRecord>> =
+        plantRecordBox.query()
+            .equal(PlantRecord_.isTracked, true)
+            .order(PlantRecord_.createdAt, QueryBuilder.DESCENDING)
+            .build()
+            .flow()
+
+    /** Flips the tracked flag on every scan of one species ("Stop tracking this plant"). */
+    suspend fun setTracked(
+        species: String,
+        tracked: Boolean,
+    ) = withContext(Dispatchers.IO) {
+        val records =
+            plantRecordBox.query()
+                .equal(PlantRecord_.detectedSpecies, species, QueryBuilder.StringOrder.CASE_INSENSITIVE)
+                .build()
+                .find()
+        records.forEach { it.isTracked = tracked }
+        plantRecordBox.put(records)
+    }
 
     private suspend fun put(record: PlantRecord, photoPath: String?): PlantRecord =
         withContext(Dispatchers.IO) {

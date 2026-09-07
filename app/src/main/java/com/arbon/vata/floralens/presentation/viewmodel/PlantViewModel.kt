@@ -56,6 +56,10 @@ class PlantViewModel(
         plantRecordRepository.observeAll()
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    val trackedPlants: StateFlow<List<PlantRecord>> =
+        plantRecordRepository.observeTracked()
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     fun completeOnboarding() {
         onboardingRepository.setDone()
     }
@@ -168,6 +172,12 @@ class PlantViewModel(
     fun toggleTracked(record: PlantRecord) {
         viewModelScope.launch {
             plantRecordRepository.save(record.copy(isTracked = !record.isTracked))
+        }
+    }
+
+    fun untrackSpecies(species: String) {
+        viewModelScope.launch {
+            plantRecordRepository.setTracked(species, tracked = false)
         }
     }
 
