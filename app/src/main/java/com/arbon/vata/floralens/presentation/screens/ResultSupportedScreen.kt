@@ -22,7 +22,10 @@ fun ResultSupportedScreen(
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
-                Text("${record.commonName} detected", style = MaterialTheme.typography.titleLarge)
+                Text(
+                    if (record.isCloudVerified) "${record.commonName} confirmed" else "Possible ${record.commonName}",
+                    style = MaterialTheme.typography.titleLarge,
+                )
                 Spacer(Modifier.height(4.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     AssistChip(onClick = {}, label = { Text(if(record.isHealthy) "Healthy" else "Sick") })
@@ -32,13 +35,21 @@ fun ResultSupportedScreen(
                 Spacer(Modifier.height(8.dp))
                 Text("Result: ${record.diseaseName}", style = MaterialTheme.typography.titleMedium)
                 LinearProgressIndicator(progress = {record.confidence}, modifier = Modifier.fillMaxWidth().padding(top=8.dp))
+                if (!record.isCloudVerified) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        "Unverified on-device estimate. Check the result against a clear photo before treating the plant.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                }
                 if(needsCloud) {
                     Spacer(Modifier.height(8.dp))
                     Text(
                         text = if (record.isCloudVerified && record.cloudLabel != null) {
-                            "Cloud second opinion: ${record.cloudLabel}"
+                            "Cloud health assessment: ${record.cloudLabel}"
                         } else {
-                            "Cloud second opinion unavailable - showing on-device result"
+                            "Disease check unavailable - showing the unverified on-device estimate"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.secondary

@@ -110,6 +110,7 @@ class PlantViewModel(
                             cloudLabel = speciesMatch.scientificName,
                             isSupported = false,
                             isCloudVerified = true,
+                            confidence = speciesMatch.confidence,
                         ),
                     )
                 _scanState.update { ScanState.Unsupported(speciesMatch.commonName, record) }
@@ -122,9 +123,8 @@ class PlantViewModel(
                 record =
                     plantRecordRepository.save(
                         record.copy(
-                            cloudLabel = speciesMatch.scientificName,
-                            isCloudVerified = true,
-                            confidence = maxOf(record.confidence, speciesMatch.confidence),
+                            detectedSpecies = speciesMatch.commonName,
+                            commonName = speciesMatch.commonName,
                         ),
                     )
             }

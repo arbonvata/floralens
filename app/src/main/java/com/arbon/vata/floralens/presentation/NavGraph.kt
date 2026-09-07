@@ -201,8 +201,11 @@ fun PlantDoctorNavGraph(
             composable(Screen.ResultUnsupported.route) {
                 val state by vm.scanState.collectAsState()
                 val unsupported = state as? ScanState.Unsupported
+                val rec = unsupported?.record
                 ResultUnsupportedScreen(
-                    species = unsupported?.species ?: "",
+                    species = unsupported?.species.orEmpty(),
+                    scientificName = rec?.cloudLabel ?: rec?.detectedSpecies ?: "",
+                    confidence = rec?.confidence,
                     onNotifyClick = {
                         vm.requestV2Notify(unsupported)
                         navController.navigate(Screen.History.route)

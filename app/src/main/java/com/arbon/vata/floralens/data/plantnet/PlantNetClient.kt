@@ -81,12 +81,18 @@ class PlantNetClient(
         // wishlist redirect from firing on noise.
         if (best.score < MIN_SCORE) return null
         val scientificName = best.species.scientificName
-        val crop = SpeciesMap.match(scientificName) ?: return null
+        val mappedCrop = SpeciesMap.match(scientificName)
+        val commonName =
+            mappedCrop
+                ?: best.species.commonNames.firstOrNull { it.isNotBlank() }
+                    ?.trim()
+                    ?.replaceFirstChar { it.uppercase() }
+                ?: scientificName
         return SpeciesMatch(
-            commonName = crop,
+            commonName = commonName,
             scientificName = scientificName,
             confidence = best.score,
-            isSupported = SpeciesMap.isSupportedCrop(crop),
+            isSupported = mappedCrop != null && SpeciesMap.isSupportedCrop(mappedCrop),
         )
     }
 

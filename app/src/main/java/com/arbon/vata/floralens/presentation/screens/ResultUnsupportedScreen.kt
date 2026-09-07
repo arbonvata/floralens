@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 fun ResultUnsupportedScreen(
     species: String = "Banana",
     scientificName: String = "Musa",
-    confidence: Float = 0.94f,
+    confidence: Float? = 0.94f,
     queuePosition: Int = 128,
     onNotifyClick: () -> Unit = {},
     onCareTipsClick: () -> Unit = {},
@@ -21,7 +21,14 @@ fun ResultUnsupportedScreen(
         Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)) {
             Column(Modifier.padding(16.dp)) {
                 Text("$species detected", style = MaterialTheme.typography.titleLarge)
-                Text("Species ID: $scientificName ✓ ${(confidence*100).toInt()}% (Pl@ntNet free)", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    if (confidence != null) {
+                        "Species ID: $scientificName ✓ ${(confidence * 100).toInt()}% (Pl@ntNet)"
+                    } else {
+                        "Species ID: $scientificName (Pl@ntNet)"
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                )
                 Spacer(Modifier.height(12.dp))
                 Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
                     Column(Modifier.padding(12.dp)) {

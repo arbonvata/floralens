@@ -3,6 +3,8 @@ package com.arbon.vata.floralens.data.photos
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
 import java.io.File
 import java.io.FileOutputStream
@@ -35,8 +37,36 @@ class ScanPhotoStore(
 
     fun file(relativePath: String): File = File(context.filesDir, relativePath)
 
-    /** Decodes a picked image for classification; null when the Uri is unreadable. */
-    fun decode(uri: Uri): Bitmap? = context.contentResolver.openInputStream(uri)?.use(BitmapFactory::decodeStream)
+    /** Decodes a picked image for classification; handles EXIF rotation so downstream code sees an upright bitmap. */
+    fun decode(uri: Uri): Bitmap? {
+        val bitmap = context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it) } ?: return null
+        val orientation = try {
+            context.contentResolver.openInputStream(uri)?.use { stream ->
+                val exif = ExifInterface(stream)
+                exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+            } ?: ExifInterface.ORIENTATION_NORMAL
+        } catch (_: Exception) {
+            ExifInterface.ORIENTATION_NORMAL
+        }
+        val matrix = Matrix()
+        when (orientation) {
+            ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.setScale(-1f, 1f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.setRotate(180f)
+            ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.setScale(1f, -1f)
+            ExifInterface.ORIENTATION_TRANSPOSE -> {
+                matrix.setRotate(90f)
+                matrix.postScale(-1f, 1f)
+            }
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.setRotate(90f)
+            ExifInterface.ORIENTATION_TRANSVERSE -> {
+                matrix.setRotate(270f)
+                matrix.postScale(-1f, 1f)
+            }
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.setRotate(270f)
+            else -> return bitmap
+        }
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+    }
 
     private fun newPhotoFile(extension: String = "jpg"): File {
         val dir = File(context.filesDir, PHOTO_DIR).apply { mkdirs() }

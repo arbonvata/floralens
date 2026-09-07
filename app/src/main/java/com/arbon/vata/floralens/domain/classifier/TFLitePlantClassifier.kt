@@ -16,8 +16,8 @@ import java.nio.channels.FileChannel
  * plant_disease_model.tflite (from the MIT-licensed obeshor/Plant-Diseases-Detector
  * project; 38 classes, output index i = PlantLabels.CLASSES[i]).
  *
- * Preprocessing mirrors the reference app: scale to 224x224, feed RGB floats
- * in [0,1] — the model normalizes internally.
+ * Preprocessing uses a centered square crop to match the square leaf framing in
+ * the scan view, then feeds RGB floats in [0,1] — the model normalizes internally.
  */
 class TFLitePlantClassifier(
     context: Context,
@@ -59,11 +59,17 @@ class TFLitePlantClassifier(
     }
 
     private fun bitmapToInputBuffer(bitmap: Bitmap): ByteBuffer {
+        // Use a centered square crop to preserve proportions without applying a
+        // fixed, overly tight crop to gallery photos where the leaf may be off-center.
+        val cropSize = minOf(bitmap.width, bitmap.height)
+        val cropLeft = (bitmap.width - cropSize) / 2
+        val cropTop = (bitmap.height - cropSize) / 2
+        val square = Bitmap.createBitmap(bitmap, cropLeft, cropTop, cropSize, cropSize)
         val scaled =
-            if (bitmap.width == INPUT_SIZE && bitmap.height == INPUT_SIZE) {
-                bitmap
+            if (square.width == INPUT_SIZE && square.height == INPUT_SIZE) {
+                square
             } else {
-                Bitmap.createScaledBitmap(bitmap, INPUT_SIZE, INPUT_SIZE, true)
+                Bitmap.createScaledBitmap(square, INPUT_SIZE, INPUT_SIZE, true)
             }
         val byteBuffer = ByteBuffer.allocateDirect(4 * INPUT_SIZE * INPUT_SIZE * PIXEL_SIZE)
         byteBuffer.order(ByteOrder.nativeOrder())
@@ -74,6 +80,8 @@ class TFLitePlantClassifier(
             byteBuffer.putFloat(((pixel shr 8) and 0xFF) / 255f) // G
             byteBuffer.putFloat((pixel and 0xFF) / 255f) // B
         }
+        // Interpreter reads from the buffer's current position.
+        byteBuffer.rewind()
         return byteBuffer
     }
 
