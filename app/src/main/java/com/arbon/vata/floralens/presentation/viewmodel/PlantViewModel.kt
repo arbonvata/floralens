@@ -5,6 +5,8 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arbon.vata.floralens.data.objectbox.PlantRecord
+import com.arbon.vata.floralens.data.objectbox.USER_CORRECTED_LABEL_PREFIX
+import com.arbon.vata.floralens.data.objectbox.USER_CORRECTED_UNKNOWN_LABEL_PREFIX
 import com.arbon.vata.floralens.data.repository.OnboardingRepository
 import com.arbon.vata.floralens.data.repository.PlantRecordRepository
 import com.arbon.vata.floralens.domain.classifier.CascadeClassifier
@@ -178,6 +180,46 @@ class PlantViewModel(
     fun untrackSpecies(species: String) {
         viewModelScope.launch {
             plantRecordRepository.setTracked(species, tracked = false)
+        }
+    }
+
+    /** Saves a user's corrected supported-plant diagnosis for this scan. */
+    fun correctDiagnosis(
+        record: PlantRecord,
+        correctedSpecies: String,
+        correctedLabel: String?,
+    ) {
+        if (correctedSpecies !in PlantLabels.SUPPORTED_SPECIES) return
+        val parsed = correctedLabel?.let { PlantLabels.parse(it) }
+        if (parsed != null && parsed.species != correctedSpecies) return
+
+        viewModelScope.launch {
+            val corrected =
+                plantRecordRepository.save(
+                    record.copy(
+                        detectedSpecies = correctedSpecies,
+                        commonName = correctedSpecies,
+                        diseaseName = parsed?.disease,
+                        isHealthy = parsed?.isHealthy ?: false,
+                        onDeviceLabel =
+                            if (parsed == null) {
+                                USER_CORRECTED_UNKNOWN_LABEL_PREFIX + correctedSpecies
+                            } else {
+                                USER_CORRECTED_LABEL_PREFIX + correctedLabel.orEmpty()
+                            },
+                        cloudLabel = null,
+                        isCloudVerified = false,
+                    ),
+                )
+            _scanState.update { current ->
+                when (current) {
+                    is ScanState.OnDeviceResult ->
+                        if (current.record.id == corrected.id) ScanState.OnDeviceResult(corrected, needsCloud = false) else current
+                    is ScanState.CloudResult ->
+                        if (current.record.id == corrected.id) ScanState.OnDeviceResult(corrected, needsCloud = false) else current
+                    else -> current
+                }
+            }
         }
     }
 

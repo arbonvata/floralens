@@ -23,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arbon.vata.floralens.data.objectbox.PlantRecord
+import com.arbon.vata.floralens.data.objectbox.isDiagnosisUnknown
+import com.arbon.vata.floralens.data.objectbox.isUserCorrected
 import com.arbon.vata.floralens.presentation.testdata.trackedPreviewRecords
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -97,7 +99,13 @@ private fun PlantProfileCard(
                         style = MaterialTheme.typography.labelSmall,
                     )
                 }
-                Text(if (latest.isHealthy) "🟢" else "🔴")
+                Text(
+                    when {
+                        latest.isDiagnosisUnknown() -> "⚪"
+                        latest.isHealthy -> "🟢"
+                        else -> "🔴"
+                    },
+                )
             }
             Spacer(Modifier.height(12.dp))
 
@@ -110,7 +118,11 @@ private fun PlantProfileCard(
                 ) {
                     Text(dayFormat.format(Date(record.createdAt)), style = MaterialTheme.typography.labelMedium)
                     Text(
-                        "${verdictLabel(record)} • ${(record.confidence * 100).toInt()}%",
+                        if (record.isUserCorrected()) {
+                            "${verdictLabel(record)} • Corrected"
+                        } else {
+                            "${verdictLabel(record)} • ${(record.confidence * 100).toInt()}%"
+                        },
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
@@ -118,13 +130,22 @@ private fun PlantProfileCard(
             }
 
             Spacer(Modifier.height(8.dp))
-            Text("Latest scan confidence", style = MaterialTheme.typography.labelSmall)
-            LinearProgressIndicator(
-                progress = { latest.confidence },
-                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-            )
             Text(
-                if (latest.isHealthy) "Looking healthy" else "Needs attention",
+                if (latest.isUserCorrected()) "Latest scan was corrected by you" else "Latest scan confidence",
+                style = MaterialTheme.typography.labelSmall,
+            )
+            if (!latest.isUserCorrected()) {
+                LinearProgressIndicator(
+                    progress = { latest.confidence },
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                )
+            }
+            Text(
+                when {
+                    latest.isDiagnosisUnknown() -> "Diagnosis unknown"
+                    latest.isHealthy -> "Looking healthy"
+                    else -> "Needs attention"
+                },
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.padding(top = 4.dp),
             )
@@ -137,6 +158,8 @@ private fun PlantProfileCard(
 
 private fun verdictLabel(record: PlantRecord): String =
     when {
+        record.isDiagnosisUnknown() -> "Diagnosis unknown"
+        record.isUserCorrected() -> "Corrected diagnosis"
         !record.isSupported -> "Species ID only"
         record.isHealthy -> "Healthy"
         else -> record.diseaseName ?: "Diagnosis pending"

@@ -211,7 +211,9 @@ fun PlantDoctorNavGraph(
                             vm.toggleTracked(record)
                             navController.navigate(Screen.MyPlants.route)
                         },
-                        onCorrectClick = { /* open correction dialog -> update ObjectBox */ },
+                        onCorrectClick = { correctedSpecies, correctedLabel ->
+                            vm.correctDiagnosis(record, correctedSpecies, correctedLabel)
+                        },
                     )
                 }
             }

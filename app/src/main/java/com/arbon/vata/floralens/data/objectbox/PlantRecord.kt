@@ -21,3 +21,13 @@ data class PlantRecord(
     var photoPath: String? = null,
     var createdAt: Long = System.currentTimeMillis(),
 )
+const val USER_CORRECTED_LABEL_PREFIX = "user_corrected:"
+const val USER_CORRECTED_UNKNOWN_LABEL_PREFIX = "user_corrected_unknown:"
+
+fun PlantRecord.isUserCorrected(): Boolean =
+    onDeviceLabel.startsWith(USER_CORRECTED_LABEL_PREFIX) || onDeviceLabel.startsWith(USER_CORRECTED_UNKNOWN_LABEL_PREFIX)
+
+fun PlantRecord.isDiagnosisUnknown(): Boolean = onDeviceLabel.startsWith(USER_CORRECTED_UNKNOWN_LABEL_PREFIX)
+
+fun PlantRecord.classifierLabel(): String =
+    onDeviceLabel.removePrefix(USER_CORRECTED_LABEL_PREFIX).removePrefix(USER_CORRECTED_UNKNOWN_LABEL_PREFIX)
