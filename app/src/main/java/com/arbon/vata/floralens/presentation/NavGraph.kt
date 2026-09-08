@@ -128,10 +128,13 @@ fun PlantDoctorNavGraph(
             }
 
             composable(Screen.Supported.route) {
+                val requestedWishlistSpecies by vm.requestedWishlistSpecies.collectAsState()
                 SupportedPlantsScreen(
                     onGotItClick = { navController.navigate(Screen.Camera.route) },
-                    onNotifyBanana = { /* vm.save wishlist record */ },
-                    onNotifyAvocado = { }
+                    onNotifyBanana = { vm.toggleWishlistRequest("Banana") },
+                    onNotifyAvocado = { vm.toggleWishlistRequest("Avocado") },
+                    bananaRequested = "banana" in requestedWishlistSpecies,
+                    avocadoRequested = "avocado" in requestedWishlistSpecies,
                 )
             }
 

@@ -27,7 +27,9 @@ private val plants = listOf(
 fun SupportedPlantsScreen(
     onGotItClick: () -> Unit = {},
     onNotifyBanana: () -> Unit = {},
-    onNotifyAvocado: () -> Unit = {}
+    onNotifyAvocado: () -> Unit = {},
+    bananaRequested: Boolean = false,
+    avocadoRequested: Boolean = false,
 ) {
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Text("We diagnose these 14", style = MaterialTheme.typography.headlineSmall)
@@ -59,16 +61,30 @@ fun SupportedPlantsScreen(
         Text("Coming in v2.0 - Vote with scans:", style = MaterialTheme.typography.titleSmall)
         Spacer(Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Card(onClick = onNotifyBanana, modifier = Modifier.weight(1f)) {
+            Card(
+                onClick = onNotifyBanana,
+                modifier = Modifier.weight(1f),
+            ) {
                 Column(Modifier.padding(12.dp)) {
                     Text("🍌 Banana")
-                    Text("Notify Me", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                    Text(
+                        if (bananaRequested) "Added" else "Notify Me",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
                 }
             }
-            Card(onClick = onNotifyAvocado, modifier = Modifier.weight(1f)) {
+            Card(
+                onClick = onNotifyAvocado,
+                modifier = Modifier.weight(1f),
+            ) {
                 Column(Modifier.padding(12.dp)) {
                     Text("🥑 Avocado")
-                    Text("Notify Me", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                    Text(
+                        if (avocadoRequested) "Added" else "Notify Me",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
                 }
             }
         }

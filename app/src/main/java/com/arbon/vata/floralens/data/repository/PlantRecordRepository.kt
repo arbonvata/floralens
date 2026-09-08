@@ -46,6 +46,40 @@ class PlantRecordRepository(
     /** Upsert for records without a new photo, e.g. "Notify me" wishlist entries or flag updates. */
     suspend fun save(record: PlantRecord): PlantRecord = put(record, photoPath = null)
 
+    /** Toggles a standalone wishlist request and clears matching scan flags when removing it. */
+    suspend fun toggleWishlistRequest(species: String): Boolean =
+        withContext(Dispatchers.IO) {
+            val existingRequests =
+                plantRecordBox.query()
+                    .equal(PlantRecord_.detectedSpecies, species, QueryBuilder.StringOrder.CASE_INSENSITIVE)
+                    .equal(PlantRecord_.isSupported, false)
+                    .equal(PlantRecord_.wantsNotifyV2, true)
+                    .build()
+                    .find()
+
+            if (existingRequests.isEmpty()) {
+                plantRecordBox.put(
+                    PlantRecord(
+                        detectedSpecies = species,
+                        commonName = species,
+                        isSupported = false,
+                        wantsNotifyV2 = true,
+                    ),
+                )
+                true
+            } else {
+                existingRequests.forEach { request ->
+                    if (request.photoPath == null) {
+                        plantRecordBox.remove(request.id)
+                    } else {
+                        request.wantsNotifyV2 = false
+                        plantRecordBox.put(request)
+                    }
+                }
+                false
+            }
+        }
+
     suspend fun getAll(): List<PlantRecord> =
         withContext(Dispatchers.IO) {
             plantRecordBox.query()

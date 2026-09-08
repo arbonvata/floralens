@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -74,6 +75,11 @@ class PlantViewModel(
     val history: StateFlow<List<PlantRecord>> =
         plantRecordRepository.observeAll()
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val requestedWishlistSpecies: StateFlow<Set<String>> =
+        history
+            .map { records -> records.filter { it.wantsNotifyV2 }.map { it.detectedSpecies.lowercase() }.toSet() }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
     val trackedPlants: StateFlow<List<PlantRecord>> =
         plantRecordRepository.observeTracked()
@@ -197,6 +203,12 @@ class PlantViewModel(
     fun untrackSpecies(species: String) {
         viewModelScope.launch {
             plantRecordRepository.setTracked(species, tracked = false)
+        }
+    }
+
+    fun toggleWishlistRequest(species: String) {
+        viewModelScope.launch {
+            plantRecordRepository.toggleWishlistRequest(species)
         }
     }
 
