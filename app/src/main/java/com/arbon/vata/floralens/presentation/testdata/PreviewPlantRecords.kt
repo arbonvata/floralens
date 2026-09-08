@@ -25,6 +25,7 @@ val tomatoEarlyBlightCloudVerified =
     tomatoEarlyBlight.copy(
         id = 2,
         isCloudVerified = true,
+        hasHealthAssessment = true,
         cloudLabel = "Alternaria solani",
     )
 

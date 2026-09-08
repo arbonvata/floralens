@@ -254,6 +254,8 @@ fun PlantDoctorNavGraph(
                     } else {
                         unsupported
                     }
+                val verificationState by vm.cloudVerificationState.collectAsState()
+                val verificationForRecord = verificationState?.takeIf { it.recordId == rec?.id }
                 ResultUnsupportedScreen(
                     species =
                         if (recordId != 0L) {
@@ -263,14 +265,18 @@ fun PlantDoctorNavGraph(
                         },
                     scientificName = rec?.cloudLabel ?: rec?.detectedSpecies ?: "",
                     confidence = rec?.confidence,
+                    hasCloudHealthAssessment = rec?.hasHealthAssessment == true,
+                    healthAssessmentHealthy = rec?.takeIf { it.hasHealthAssessment }?.isHealthy,
+                    healthAssessmentDisease = rec?.diseaseName,
+                    isSecondOpinionRunning = verificationForRecord?.isRunning == true,
+                    secondOpinionMessage = verificationForRecord?.message,
                     onNotifyClick = {
                         vm.requestV2Notify(displayedUnsupported)
                         navController.navigate(Screen.History.route)
                     },
                     onCareTipsClick = { /* call Trefle API */ },
                     onSecondOpinionClick = {
-                        navController.navigate(Screen.Analyzing.route)
-                        // vm.scanWithCloud()
+                        rec?.let(vm::verifyUnsupportedWithCloud)
                     },
                 )
             }

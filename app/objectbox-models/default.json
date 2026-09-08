@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:8039897946384294131",
-      "lastPropertyId": "14:406357433156011560",
+      "lastPropertyId": "15:2934477236232707736",
       "name": "PlantRecord",
       "properties": [
         {
@@ -80,6 +80,11 @@
           "id": "14:406357433156011560",
           "name": "createdAt",
           "type": 6
+        },
+        {
+          "id": "15:2934477236232707736",
+          "name": "hasHealthAssessment",
+          "type": 1
         }
       ],
       "relations": []

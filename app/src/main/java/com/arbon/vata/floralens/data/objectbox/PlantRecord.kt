@@ -16,6 +16,9 @@ data class PlantRecord(
     var cloudLabel: String? = null,
     var isSupported: Boolean = true,
     var isCloudVerified: Boolean = false,
+    // Separate from isCloudVerified: legacy rows were stamped isCloudVerified=true at
+    // species-identification time, before any Plant.id health assessment existed.
+    var hasHealthAssessment: Boolean = false,
     var wantsNotifyV2: Boolean = false,
     var isTracked: Boolean = false,
     var photoPath: String? = null,

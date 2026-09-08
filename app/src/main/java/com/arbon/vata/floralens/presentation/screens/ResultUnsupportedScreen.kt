@@ -12,6 +12,11 @@ fun ResultUnsupportedScreen(
     species: String = "Banana",
     scientificName: String = "Musa",
     confidence: Float? = 0.94f,
+    hasCloudHealthAssessment: Boolean = false,
+    healthAssessmentHealthy: Boolean? = null,
+    healthAssessmentDisease: String? = null,
+    isSecondOpinionRunning: Boolean = false,
+    secondOpinionMessage: String? = null,
     queuePosition: Int = 128,
     onNotifyClick: () -> Unit = {},
     onCareTipsClick: () -> Unit = {},
@@ -32,7 +37,19 @@ fun ResultUnsupportedScreen(
                 Spacer(Modifier.height(12.dp))
                 Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
                     Column(Modifier.padding(12.dp)) {
-                        Text("Disease check: Coming in v2.0")
+                        if (hasCloudHealthAssessment) {
+                            Text("Cloud health assessment")
+                            Text(
+                                if (healthAssessmentHealthy == true) {
+                                    "Plant.id found no health issue."
+                                } else {
+                                    "Possible issue: ${healthAssessmentDisease ?: "health concern detected"}"
+                                },
+                            )
+                        } else {
+                            Text("No offline disease diagnosis is available for this plant.")
+                            Text("Request an on-demand cloud health assessment.", style = MaterialTheme.typography.labelSmall)
+                        }
                         Text("You're #$queuePosition to request $species. This helps us prioritize.", style = MaterialTheme.typography.labelSmall)
                     }
                 }
@@ -55,7 +72,27 @@ fun ResultUnsupportedScreen(
         Spacer(Modifier.height(8.dp))
         OutlinedButton(onClick = onCareTipsClick, modifier = Modifier.fillMaxWidth()) { Text("Get general care tips") }
         Spacer(Modifier.height(8.dp))
-        TextButton(onClick = onSecondOpinionClick, modifier = Modifier.fillMaxWidth()) { Text("Get AI second opinion (1 cloud credit)") }
+        secondOpinionMessage?.let { message ->
+            Text(
+                message,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(bottom = 4.dp),
+            )
+        }
+        TextButton(
+            onClick = onSecondOpinionClick,
+            enabled = !isSecondOpinionRunning,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            if (isSecondOpinionRunning) {
+                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                Spacer(Modifier.width(8.dp))
+                Text("Checking with Plant.id…")
+            } else {
+                Text(if (hasCloudHealthAssessment) "Check again with Plant.id" else "Get AI second opinion")
+            }
+        }
     }
 }
 

@@ -53,7 +53,7 @@ private fun PlantRecord.matches(filter: HistoryFilter): Boolean =
         HistoryFilter.ALL -> true
         HistoryFilter.SUPPORTED -> isSupported
         HistoryFilter.WISHLIST -> !isSupported
-        HistoryFilter.VERIFIED -> isCloudVerified
+        HistoryFilter.VERIFIED -> hasHealthAssessment
     }
 
 /** Low-confidence results get the yellow flag even when classified healthy. */
@@ -183,7 +183,7 @@ private fun HistoryGridItem(
             ) {
                 if (record.isSupported) {
                     Text(record.healthBadge())
-                    if (record.isCloudVerified) Text("☁️")
+                    if (record.hasHealthAssessment) Text("☁️")
                 }
             }
             if (!record.isSupported) {

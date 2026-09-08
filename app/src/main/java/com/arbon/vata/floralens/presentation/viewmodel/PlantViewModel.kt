@@ -134,7 +134,7 @@ class PlantViewModel(
                             commonName = speciesMatch.commonName,
                             cloudLabel = speciesMatch.scientificName,
                             isSupported = false,
-                            isCloudVerified = true,
+                            isCloudVerified = false,
                             confidence = speciesMatch.confidence,
                         ),
                     )
@@ -171,6 +171,7 @@ class PlantViewModel(
                                 },
                             cloudLabel = assessment.diseaseName ?: "Healthy",
                             isCloudVerified = true,
+                            hasHealthAssessment = true,
                             confidence = maxOf(record.confidence, assessment.confidence),
                         ),
                     )
@@ -254,6 +255,18 @@ class PlantViewModel(
 
     /** Rechecks a saved scan with the cloud services even when the on-device model was confident. */
     fun verifyWithCloud(record: PlantRecord) {
+        startCloudVerification(record, identifySpecies = true)
+    }
+
+    /** Requests a Plant.id health assessment for a plant outside the offline model's supported classes. */
+    fun verifyUnsupportedWithCloud(record: PlantRecord) {
+        startCloudVerification(record, identifySpecies = false)
+    }
+
+    private fun startCloudVerification(
+        record: PlantRecord,
+        identifySpecies: Boolean,
+    ) {
         val alreadyRunning = _cloudVerificationState.value?.let { it.recordId == record.id && it.isRunning } == true
         if (alreadyRunning) return
 
@@ -266,7 +279,7 @@ class PlantViewModel(
         _cloudVerificationState.value = CloudVerificationState(record.id, isRunning = true)
         viewModelScope.launch {
             try {
-                val result = verifySavedRecord(record, photoPath)
+                val result = verifySavedRecord(record, photoPath, identifySpecies)
                 if (result == null) {
                     setCloudVerificationResult(record.id, "The saved photo could not be opened.")
                     return@launch
@@ -285,13 +298,14 @@ class PlantViewModel(
     private suspend fun verifySavedRecord(
         record: PlantRecord,
         photoPath: String,
+        identifySpecies: Boolean,
     ): CloudVerificationResult? {
         val photo = plantRecordRepository.decodeSavedPhoto(photoPath) ?: return null
-        val speciesMatch = speciesIdentifier.identify(photo)
+        val speciesMatch = if (identifySpecies) speciesIdentifier.identify(photo) else null
         val diseaseAssessment = diseaseVerifier.assess(photo)
         val updated = record.applyCloudResults(speciesMatch, diseaseAssessment)
         val saved = plantRecordRepository.save(updated)
-        return CloudVerificationResult(saved, verificationMessage(speciesMatch, diseaseAssessment))
+        return CloudVerificationResult(saved, verificationMessage(speciesMatch, diseaseAssessment, identifySpecies))
     }
 
     private fun PlantRecord.applyCloudResults(
@@ -314,12 +328,20 @@ class PlantViewModel(
                 updated.copy(
                     isHealthy = diseaseAssessment.isHealthy,
                     diseaseName = if (diseaseAssessment.isHealthy) null else diseaseAssessment.diseaseName,
-                    cloudLabel = diseaseAssessment.diseaseName ?: "Healthy",
+                    cloudLabel =
+                        if (updated.isSupported) diseaseAssessment.diseaseName ?: "Healthy"
+                        else updated.cloudLabel,
                     isCloudVerified = true,
-                    confidence = diseaseAssessment.confidence,
-                    onDeviceLabel = updated.onDeviceLabel
-                        .removePrefix(USER_CORRECTED_LABEL_PREFIX)
-                        .removePrefix(USER_CORRECTED_UNKNOWN_LABEL_PREFIX),
+                    hasHealthAssessment = true,
+                    confidence = if (updated.isSupported) diseaseAssessment.confidence else updated.confidence,
+                    onDeviceLabel =
+                        if (updated.isSupported) {
+                            updated.onDeviceLabel
+                                .removePrefix(USER_CORRECTED_LABEL_PREFIX)
+                                .removePrefix(USER_CORRECTED_UNKNOWN_LABEL_PREFIX)
+                        } else {
+                            updated.onDeviceLabel
+                        },
                 )
         }
         return updated
@@ -328,13 +350,15 @@ class PlantViewModel(
     private fun verificationMessage(
         speciesMatch: SpeciesMatch?,
         diseaseAssessment: DiseaseAssessment?,
+        identifySpecies: Boolean,
     ): String =
         when {
             speciesMatch != null && !speciesMatch.isSupported ->
                 "Cloud identified ${speciesMatch.commonName}, which is outside supported diagnoses."
             diseaseAssessment != null -> "Cloud health assessment received."
             speciesMatch != null -> "Plant species checked; disease verification was unavailable."
-            else -> "Cloud verification was unavailable. Check your connection and API setup."
+            identifySpecies -> "Cloud verification was unavailable. Check your connection and API setup."
+            else -> "No cloud health assessment was returned. Check your connection, API key, and credits."
         }
 
     private fun updateActiveScan(record: PlantRecord) {
@@ -350,6 +374,8 @@ class PlantViewModel(
                         if (record.isSupported) ScanState.CloudResult(record)
                         else ScanState.Unsupported(record.commonName, record)
                     } else current
+                is ScanState.Unsupported ->
+                    if (current.record?.id == record.id) ScanState.Unsupported(record.commonName, record) else current
                 else -> current
             }
         }
