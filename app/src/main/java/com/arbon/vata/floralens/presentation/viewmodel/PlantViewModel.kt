@@ -11,8 +11,11 @@ import com.arbon.vata.floralens.data.repository.OnboardingRepository
 import com.arbon.vata.floralens.data.repository.PlantRecordRepository
 import com.arbon.vata.floralens.domain.classifier.CascadeClassifier
 import com.arbon.vata.floralens.domain.classifier.PlantLabels
+import com.arbon.vata.floralens.domain.diagnosis.DiseaseAssessment
 import com.arbon.vata.floralens.domain.diagnosis.DiseaseVerifier
+import com.arbon.vata.floralens.domain.species.SpeciesMatch
 import com.arbon.vata.floralens.domain.species.SpeciesIdentifier
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -40,6 +43,17 @@ sealed class ScanState {
     ) : ScanState()
 }
 
+data class CloudVerificationState(
+    val recordId: Long,
+    val isRunning: Boolean,
+    val message: String? = null,
+)
+
+private data class CloudVerificationResult(
+    val record: PlantRecord,
+    val message: String,
+)
+
 class PlantViewModel(
     private val plantRecordRepository: PlantRecordRepository,
     private val onboardingRepository: OnboardingRepository,
@@ -53,6 +67,9 @@ class PlantViewModel(
 
     private val _scanState = MutableStateFlow<ScanState>(ScanState.Idle)
     val scanState: StateFlow<ScanState> = _scanState.asStateFlow()
+
+    private val _cloudVerificationState = MutableStateFlow<CloudVerificationState?>(null)
+    val cloudVerificationState: StateFlow<CloudVerificationState?> = _cloudVerificationState.asStateFlow()
 
     val history: StateFlow<List<PlantRecord>> =
         plantRecordRepository.observeAll()
@@ -221,6 +238,113 @@ class PlantViewModel(
                 }
             }
         }
+    }
+
+    /** Rechecks a saved scan with the cloud services even when the on-device model was confident. */
+    fun verifyWithCloud(record: PlantRecord) {
+        val alreadyRunning = _cloudVerificationState.value?.let { it.recordId == record.id && it.isRunning } == true
+        if (alreadyRunning) return
+
+        val photoPath = record.photoPath
+        if (photoPath == null) {
+            setCloudVerificationResult(record.id, "This scan has no saved photo to verify.")
+            return
+        }
+
+        _cloudVerificationState.value = CloudVerificationState(record.id, isRunning = true)
+        viewModelScope.launch {
+            try {
+                val result = verifySavedRecord(record, photoPath)
+                if (result == null) {
+                    setCloudVerificationResult(record.id, "The saved photo could not be opened.")
+                    return@launch
+                }
+
+                updateActiveScan(result.record)
+                setCloudVerificationResult(result.record.id, result.message)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                setCloudVerificationResult(record.id, "Cloud verification failed. Please try again.")
+            }
+        }
+    }
+
+    private suspend fun verifySavedRecord(
+        record: PlantRecord,
+        photoPath: String,
+    ): CloudVerificationResult? {
+        val photo = plantRecordRepository.decodeSavedPhoto(photoPath) ?: return null
+        val speciesMatch = speciesIdentifier.identify(photo)
+        val diseaseAssessment = diseaseVerifier.assess(photo)
+        val updated = record.applyCloudResults(speciesMatch, diseaseAssessment)
+        val saved = plantRecordRepository.save(updated)
+        return CloudVerificationResult(saved, verificationMessage(speciesMatch, diseaseAssessment))
+    }
+
+    private fun PlantRecord.applyCloudResults(
+        speciesMatch: SpeciesMatch?,
+        diseaseAssessment: DiseaseAssessment?,
+    ): PlantRecord {
+        var updated = this
+        if (speciesMatch != null) {
+            updated =
+                updated.copy(
+                    detectedSpecies = speciesMatch.commonName,
+                    commonName = speciesMatch.commonName,
+                    isSupported = speciesMatch.isSupported,
+                    cloudLabel = speciesMatch.scientificName,
+                    confidence = if (speciesMatch.isSupported) updated.confidence else speciesMatch.confidence,
+                )
+        }
+        if (diseaseAssessment != null && speciesMatch?.isSupported != false) {
+            updated =
+                updated.copy(
+                    isHealthy = diseaseAssessment.isHealthy,
+                    diseaseName = if (diseaseAssessment.isHealthy) null else diseaseAssessment.diseaseName,
+                    cloudLabel = diseaseAssessment.diseaseName ?: "Healthy",
+                    isCloudVerified = true,
+                    confidence = diseaseAssessment.confidence,
+                    onDeviceLabel = updated.onDeviceLabel
+                        .removePrefix(USER_CORRECTED_LABEL_PREFIX)
+                        .removePrefix(USER_CORRECTED_UNKNOWN_LABEL_PREFIX),
+                )
+        }
+        return updated
+    }
+
+    private fun verificationMessage(
+        speciesMatch: SpeciesMatch?,
+        diseaseAssessment: DiseaseAssessment?,
+    ): String =
+        when {
+            speciesMatch != null && !speciesMatch.isSupported ->
+                "Cloud identified ${speciesMatch.commonName}, which is outside supported diagnoses."
+            diseaseAssessment != null -> "Cloud health assessment received."
+            speciesMatch != null -> "Plant species checked; disease verification was unavailable."
+            else -> "Cloud verification was unavailable. Check your connection and API setup."
+        }
+
+    private fun updateActiveScan(record: PlantRecord) {
+        _scanState.update { current ->
+            when (current) {
+                is ScanState.OnDeviceResult ->
+                    if (current.record.id == record.id) {
+                        if (record.isSupported) ScanState.OnDeviceResult(record, needsCloud = false)
+                        else ScanState.Unsupported(record.commonName, record)
+                    } else current
+                is ScanState.CloudResult ->
+                    if (current.record.id == record.id) {
+                        if (record.isSupported) ScanState.CloudResult(record)
+                        else ScanState.Unsupported(record.commonName, record)
+                    } else current
+                else -> current
+            }
+        }
+    }
+
+    private fun setCloudVerificationResult(recordId: Long, message: String) {
+        _cloudVerificationState.value = CloudVerificationState(recordId, isRunning = false, message = message)
     }
 
     /** "Notify me when supported": flags the scan record, or files a standalone wishlist entry. */

@@ -199,13 +199,27 @@ fun PlantDoctorNavGraph(
                     when (val s = state) {
                         is ScanState.OnDeviceResult -> s.record
                         is ScanState.CloudResult -> s.record
+                        is ScanState.Unsupported -> s.record
                         else -> null
                     }
                 }
+                LaunchedEffect(record?.id, record?.isSupported) {
+                    if (record != null && !record.isSupported) {
+                        navController.navigate(Screen.ResultUnsupported.historyRoute(record.id)) {
+                            popUpTo(Screen.Camera.route)
+                            launchSingleTop = true
+                        }
+                    }
+                }
+                val verificationState by vm.cloudVerificationState.collectAsState()
+                val verificationForRecord = verificationState?.takeIf { it.recordId == record?.id }
                 if (record != null) {
                     ResultSupportedScreen(
                         record = record,
                         needsCloud = recordId == 0L && state is ScanState.CloudResult,
+                        isCloudVerificationRunning = verificationForRecord?.isRunning == true,
+                        cloudVerificationMessage = verificationForRecord?.message,
+                        onVerifyWithCloudClick = { vm.verifyWithCloud(record) },
                         onSaveClick = { navController.navigate(Screen.History.route) },
                         onTrackClick = {
                             vm.toggleTracked(record)

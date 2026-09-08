@@ -37,6 +37,12 @@ class PlantRecordRepository(
     suspend fun decode(photoUri: Uri): Bitmap? =
         withContext(Dispatchers.IO) { photoStore.decode(photoUri) }
 
+    /** Decodes a previously saved scan photo, including its EXIF orientation. */
+    suspend fun decodeSavedPhoto(relativePath: String): Bitmap? =
+        withContext(Dispatchers.IO) {
+            photoStore.decode(Uri.fromFile(photoStore.file(relativePath)))
+        }
+
     /** Upsert for records without a new photo, e.g. "Notify me" wishlist entries or flag updates. */
     suspend fun save(record: PlantRecord): PlantRecord = put(record, photoPath = null)
 

@@ -23,6 +23,9 @@ import com.arbon.vata.floralens.presentation.testdata.tomatoEarlyBlightCloudVeri
 fun ResultSupportedScreen(
     record: PlantRecord = tomatoEarlyBlight,
     needsCloud: Boolean = false,
+    isCloudVerificationRunning: Boolean = false,
+    cloudVerificationMessage: String? = null,
+    onVerifyWithCloudClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
     onTrackClick: () -> Unit = {},
     onCorrectClick: (String, String?) -> Unit = { _, _ -> },
@@ -120,6 +123,32 @@ fun ResultSupportedScreen(
             }
         }
         Spacer(Modifier.height(16.dp))
+        if (!record.isCloudVerified) {
+            OutlinedButton(
+                onClick = onVerifyWithCloudClick,
+                enabled = !isCloudVerificationRunning,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                if (isCloudVerificationRunning) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Checking with cloud…")
+                } else {
+                    Text("Verify with cloud")
+                }
+            }
+        }
+        cloudVerificationMessage?.let { message ->
+            Text(
+                message,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
         Text("What to do:", style = MaterialTheme.typography.titleSmall)
         Spacer(Modifier.height(8.dp))
         Card {
