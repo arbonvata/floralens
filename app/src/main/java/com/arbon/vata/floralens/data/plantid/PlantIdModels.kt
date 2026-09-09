@@ -6,9 +6,10 @@ import kotlinx.serialization.Serializable
 
 /**
  * Wire format of Plant.id's `health_assessment` endpoint. Tolerant on purpose:
- * v3 wraps the payload in a `result` object while v2 kept the fields top-level,
- * and either shape decodes — the mapping falls back to the flat fields when no
- * wrapper is present. All fields default so extra/missing keys never break us.
+ * v3 wraps the payload in a `result` object with suggestions nested under
+ * `result.disease.suggestions`, while a flat v2-style shape also decodes — the
+ * mapping falls back to the top-level fields when no wrapper is present. All
+ * fields default so extra/missing keys never break us.
  */
 @Serializable
 data class PlantIdResponse(
@@ -20,7 +21,17 @@ data class PlantIdResponse(
 @Serializable
 data class PlantIdAssessment(
     @SerialName("is_healthy") val isHealthy: PlantIdHealth? = null,
-    @SerialName("disease_suggestions") val diseaseSuggestions: List<PlantIdDisease> = emptyList(),
+    @SerialName("disease") val disease: PlantIdDiseaseSection? = null,
+    @SerialName("disease_suggestions") val flatDiseaseSuggestions: List<PlantIdDisease> = emptyList(),
+) {
+    val diseaseSuggestions: List<PlantIdDisease>
+        get() = disease?.suggestions ?: flatDiseaseSuggestions
+}
+
+/** v3 groups the disease suggestion list under a `disease` object in `result`. */
+@Serializable
+data class PlantIdDiseaseSection(
+    val suggestions: List<PlantIdDisease> = emptyList(),
 )
 
 /** `binary` is the API's own healthy/sick call; `probability` its confidence (0..1). */
@@ -46,7 +57,7 @@ data class PlantIdDisease(
  */
 internal fun PlantIdResponse.toAssessment(minProbability: Float = 0.1f): DiseaseAssessment? {
     val assessment =
-        result ?: PlantIdAssessment(isHealthy = flatIsHealthy, diseaseSuggestions = flatDiseaseSuggestions)
+        result ?: PlantIdAssessment(isHealthy = flatIsHealthy, flatDiseaseSuggestions = flatDiseaseSuggestions)
     val health = assessment.isHealthy ?: return null
     if (health.binary == true) {
         return DiseaseAssessment(isHealthy = true, diseaseName = null, confidence = health.probability)

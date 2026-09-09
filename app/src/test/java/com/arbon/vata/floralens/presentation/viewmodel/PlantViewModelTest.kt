@@ -1,6 +1,7 @@
 package com.arbon.vata.floralens.presentation.viewmodel
 
 import android.graphics.Bitmap
+import android.net.Uri
 import com.arbon.vata.floralens.data.objectbox.PlantRecord
 import com.arbon.vata.floralens.data.repository.OnboardingRepository
 import com.arbon.vata.floralens.data.repository.PlantRecordRepository
@@ -97,6 +98,7 @@ class PlantViewModelTest {
     @Test
     fun `unsupported second opinion skips species identification and preserves the record`() = runTest {
         val vm = createViewModel()
+        coEvery { plantRecordRepository.get(5L) } returns unsupportedBananaScan()
         coEvery { diseaseVerifier.assess(bitmap) } returns DiseaseAssessment(isHealthy = false, diseaseName = "Black Sigatoka", confidence = 0.77f)
 
         vm.verifyUnsupportedWithCloud(unsupportedBananaScan())
@@ -120,6 +122,7 @@ class PlantViewModelTest {
     @Test
     fun `unsupported second opinion with healthy verdict clears the stale on-device disease`() = runTest {
         val vm = createViewModel()
+        coEvery { plantRecordRepository.get(5L) } returns unsupportedBananaScan()
         coEvery { diseaseVerifier.assess(bitmap) } returns DiseaseAssessment(isHealthy = true, diseaseName = null, confidence = 0.96f)
 
         vm.verifyUnsupportedWithCloud(unsupportedBananaScan())
@@ -135,6 +138,7 @@ class PlantViewModelTest {
     @Test
     fun `unavailable assessment is reported without claiming verification`() = runTest {
         val vm = createViewModel()
+        coEvery { plantRecordRepository.get(5L) } returns unsupportedBananaScan()
         coEvery { diseaseVerifier.assess(bitmap) } returns null
 
         vm.verifyUnsupportedWithCloud(unsupportedBananaScan())
@@ -144,6 +148,23 @@ class PlantViewModelTest {
         assertFalse(saved.hasHealthAssessment)
         assertFalse(saved.isCloudVerified)
         assertEquals("No cloud health assessment was returned. Check your connection, API key, and credits.", vm.cloudVerificationState.value?.message)
+    }
+
+    @Test
+    fun `verification merges cloud results onto edits made while it ran`() = runTest {
+        val vm = createViewModel()
+        // The user tracked the plant while the network request was in flight;
+        // the row re-read at response time carries that edit.
+        coEvery { plantRecordRepository.get(5L) } returns unsupportedBananaScan().copy(isTracked = true)
+        coEvery { diseaseVerifier.assess(bitmap) } returns DiseaseAssessment(isHealthy = false, diseaseName = "Black Sigatoka", confidence = 0.77f)
+
+        vm.verifyUnsupportedWithCloud(unsupportedBananaScan())
+        advanceUntilIdle()
+
+        val saved = savedRecord.captured
+        assertTrue(saved.isTracked)
+        assertTrue(saved.isCloudVerified)
+        assertEquals("Black Sigatoka", saved.diseaseName)
     }
 
     @Test
@@ -174,6 +195,7 @@ class PlantViewModelTest {
             )
         coEvery { speciesIdentifier.identify(bitmap) } returns SpeciesMatch("Tomato", "Lycopersicon esculentum", 0.88f, isSupported = true)
         coEvery { diseaseVerifier.assess(bitmap) } returns DiseaseAssessment(isHealthy = true, diseaseName = null, confidence = 0.98f)
+        coEvery { plantRecordRepository.get(9L) } returns corrected
 
         vm.verifyWithCloud(corrected)
         advanceUntilIdle()
@@ -210,6 +232,23 @@ class PlantViewModelTest {
         assertEquals("Banana", (state as ScanState.Unsupported).species)
         assertEquals(saved, state.record)
         coVerify(exactly = 0) { diseaseVerifier.assess(any()) }
+    }
+
+    @Test
+    fun `gallery import enters scanning before decoding so the previous result is not shown`() = runTest {
+        val vm = createViewModel()
+        val stateAtDecode = mutableListOf<ScanState>()
+        coEvery { plantRecordRepository.decode(any<Uri>()) } answers {
+            stateAtDecode.add(vm.scanState.value)
+            null
+        }
+        coEvery { plantRecordRepository.saveScan(any<Uri>(), any()) } answers { secondArg<PlantRecord>().copy(id = 7L) }
+
+        vm.scan(mockk<Uri>())
+        advanceUntilIdle()
+
+        assertEquals(listOf<ScanState>(ScanState.Scanning), stateAtDecode)
+        assertTrue(vm.scanState.value is ScanState.Saved)
     }
 
     @Test

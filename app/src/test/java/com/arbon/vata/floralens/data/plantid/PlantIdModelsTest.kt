@@ -19,18 +19,20 @@ class PlantIdModelsTest {
         val payload = """
             {
               "result": {
-                "classification": [{"name": "Solanum lycopersicum", "probability": 0.93}],
+                "classification": {"suggestions": [{"name": "Solanum lycopersicum", "probability": 0.93}]},
                 "is_healthy": {"binary": false, "probability": 0.07},
-                "disease_suggestions": [
-                  {
-                    "id": 1234,
-                    "name": "Tomato late blight",
-                    "probability": 0.61,
-                    "similar_images": [],
-                    "disease_details": {"common_names": ["late blight"], "cause": "Phytophthora infestans"}
-                  },
-                  {"name": "Tomato early blight", "probability": 0.22}
-                ],
+                "disease": {
+                  "suggestions": [
+                    {
+                      "id": 1234,
+                      "name": "Tomato late blight",
+                      "probability": 0.61,
+                      "similar_images": [],
+                      "disease_details": {"common_names": ["late blight"], "cause": "Phytophthora infestans"}
+                    },
+                    {"name": "Tomato early blight", "probability": 0.22}
+                  ]
+                },
                 "is_plant": {"probability": 0.99}
               },
               "input": {"latitude": null, "longitude": null}
@@ -66,7 +68,7 @@ class PlantIdModelsTest {
             {
               "result": {
                 "is_healthy": {"binary": true, "probability": 0.88},
-                "disease_suggestions": [{"name": "Tomato leaf mold", "probability": 0.05}]
+                "disease": {"suggestions": [{"name": "Tomato leaf mold", "probability": 0.05}]}
               }
             }
         """.trimIndent()
@@ -83,7 +85,7 @@ class PlantIdModelsTest {
             {
               "result": {
                 "is_healthy": {"binary": false, "probability": 0.4},
-                "disease_suggestions": [{"name": "Something vague", "probability": 0.08}]
+                "disease": {"suggestions": [{"name": "Something vague", "probability": 0.08}]}
               }
             }
         """.trimIndent()
@@ -95,7 +97,7 @@ class PlantIdModelsTest {
 
     @Test
     fun `missing health block yields null`() {
-        val payload = """{"result": {"disease_suggestions": []}}"""
+        val payload = """{"result": {"disease": {"suggestions": []}}}"""
 
         assertNull(json.decodeFromString<PlantIdResponse>(payload).toAssessment())
     }
@@ -106,10 +108,12 @@ class PlantIdModelsTest {
             {
               "result": {
                 "is_healthy": {"binary": false, "probability": 0.1},
-                "disease_suggestions": [
-                  {"name": "Weak guess", "probability": 0.12},
-                  {"name": "Strong guess", "probability": 0.77}
-                ]
+                "disease": {
+                  "suggestions": [
+                    {"name": "Weak guess", "probability": 0.12},
+                    {"name": "Strong guess", "probability": 0.77}
+                  ]
+                }
               }
             }
         """.trimIndent()

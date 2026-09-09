@@ -50,11 +50,6 @@ data class CloudVerificationState(
     val message: String? = null,
 )
 
-private data class CloudVerificationResult(
-    val record: PlantRecord,
-    val message: String,
-)
-
 class PlantViewModel(
     private val plantRecordRepository: PlantRecordRepository,
     private val onboardingRepository: OnboardingRepository,
@@ -183,6 +178,9 @@ class PlantViewModel(
     /** Gallery import: classify the decoded bitmap, or store an unclassifiable marker. */
     fun scan(photoUri: Uri) {
         viewModelScope.launch {
+            // Decoding can take a moment; without this the Analyzing screen would
+            // land on the previous scan's terminal state and show its result.
+            _scanState.update { ScanState.Scanning }
             val bitmap = plantRecordRepository.decode(photoUri)
             if (bitmap != null) {
                 scan(bitmap)
@@ -279,33 +277,33 @@ class PlantViewModel(
         _cloudVerificationState.value = CloudVerificationState(record.id, isRunning = true)
         viewModelScope.launch {
             try {
-                val result = verifySavedRecord(record, photoPath, identifySpecies)
-                if (result == null) {
+                val photo = plantRecordRepository.decodeSavedPhoto(photoPath)
+                if (photo == null) {
                     setCloudVerificationResult(record.id, "The saved photo could not be opened.")
                     return@launch
                 }
 
-                updateActiveScan(result.record)
-                setCloudVerificationResult(result.record.id, result.message)
+                val speciesMatch = if (identifySpecies) speciesIdentifier.identify(photo) else null
+                val diseaseAssessment = diseaseVerifier.assess(photo)
+
+                // The cloud calls run for seconds, during which the user may edit
+                // the scan (correction, tracking). Cloud fields must merge onto
+                // the row as it exists now, not the snapshot from button-tap time.
+                val current = plantRecordRepository.get(record.id)
+                if (current == null) {
+                    setCloudVerificationResult(record.id, "This scan no longer exists.")
+                    return@launch
+                }
+                val saved = plantRecordRepository.save(current.applyCloudResults(speciesMatch, diseaseAssessment))
+
+                updateActiveScan(saved)
+                setCloudVerificationResult(saved.id, verificationMessage(speciesMatch, diseaseAssessment, identifySpecies))
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
                 setCloudVerificationResult(record.id, "Cloud verification failed. Please try again.")
             }
         }
-    }
-
-    private suspend fun verifySavedRecord(
-        record: PlantRecord,
-        photoPath: String,
-        identifySpecies: Boolean,
-    ): CloudVerificationResult? {
-        val photo = plantRecordRepository.decodeSavedPhoto(photoPath) ?: return null
-        val speciesMatch = if (identifySpecies) speciesIdentifier.identify(photo) else null
-        val diseaseAssessment = diseaseVerifier.assess(photo)
-        val updated = record.applyCloudResults(speciesMatch, diseaseAssessment)
-        val saved = plantRecordRepository.save(updated)
-        return CloudVerificationResult(saved, verificationMessage(speciesMatch, diseaseAssessment, identifySpecies))
     }
 
     private fun PlantRecord.applyCloudResults(

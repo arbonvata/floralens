@@ -80,6 +80,10 @@ class PlantRecordRepository(
             }
         }
 
+    /** One record by id; null when it no longer exists. */
+    suspend fun get(id: Long): PlantRecord? =
+        withContext(Dispatchers.IO) { plantRecordBox.get(id) }
+
     suspend fun getAll(): List<PlantRecord> =
         withContext(Dispatchers.IO) {
             plantRecordBox.query()
