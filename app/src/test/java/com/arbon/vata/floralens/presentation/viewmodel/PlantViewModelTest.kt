@@ -16,12 +16,14 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -165,6 +167,29 @@ class PlantViewModelTest {
         assertTrue(saved.isTracked)
         assertTrue(saved.isCloudVerified)
         assertEquals("Black Sigatoka", saved.diseaseName)
+    }
+
+    @Test
+    fun `correction made during verification wins over the cloud response`() = runTest {
+        val vm = createViewModel()
+        val record = unsupportedBananaScan().copy(isSupported = true, detectedSpecies = "Tomato", commonName = "Tomato")
+        val response = CompletableDeferred<DiseaseAssessment?>()
+        coEvery { speciesIdentifier.identify(bitmap) } returns SpeciesMatch("Tomato", "Solanum lycopersicum", 0.9f, true)
+        coEvery { diseaseVerifier.assess(bitmap) } coAnswers { response.await() }
+        coEvery { plantRecordRepository.get(record.id) } answers { savedRecord.captured }
+
+        vm.verifyWithCloud(record)
+        runCurrent()
+        vm.correctDiagnosis(record, "Corn", "Corn___Northern_Leaf_Blight")
+        runCurrent()
+        response.complete(DiseaseAssessment(true, null, 0.98f))
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { plantRecordRepository.save(any()) }
+        assertEquals("Corn", savedRecord.captured.detectedSpecies)
+        assertEquals("user_corrected:Corn___Northern_Leaf_Blight", savedRecord.captured.onDeviceLabel)
+        assertFalse(savedRecord.captured.hasHealthAssessment)
+        assertTrue(vm.cloudVerificationState.value?.message.orEmpty().contains("correction was kept"))
     }
 
     @Test

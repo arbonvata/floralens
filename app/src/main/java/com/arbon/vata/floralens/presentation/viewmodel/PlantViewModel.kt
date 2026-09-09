@@ -64,6 +64,8 @@ class PlantViewModel(
     private val _scanState = MutableStateFlow<ScanState>(ScanState.Idle)
     val scanState: StateFlow<ScanState> = _scanState.asStateFlow()
 
+    private val diagnosisRevisions = mutableMapOf<Long, Long>()
+
     private val _cloudVerificationState = MutableStateFlow<CloudVerificationState?>(null)
     val cloudVerificationState: StateFlow<CloudVerificationState?> = _cloudVerificationState.asStateFlow()
 
@@ -220,6 +222,7 @@ class PlantViewModel(
         if (correctedSpecies !in PlantLabels.SUPPORTED_SPECIES) return
         val parsed = correctedLabel?.let { PlantLabels.parse(it) }
         if (parsed != null && parsed.species != correctedSpecies) return
+        diagnosisRevisions[record.id] = (diagnosisRevisions[record.id] ?: 0L) + 1
 
         viewModelScope.launch {
             val corrected =
@@ -237,6 +240,7 @@ class PlantViewModel(
                             },
                         cloudLabel = null,
                         isCloudVerified = false,
+                        hasHealthAssessment = false,
                     ),
                 )
             _scanState.update { current ->
@@ -274,6 +278,7 @@ class PlantViewModel(
             return
         }
 
+        val diagnosisRevision = diagnosisRevisions[record.id] ?: 0L
         _cloudVerificationState.value = CloudVerificationState(record.id, isRunning = true)
         viewModelScope.launch {
             try {
@@ -292,6 +297,10 @@ class PlantViewModel(
                 val current = plantRecordRepository.get(record.id)
                 if (current == null) {
                     setCloudVerificationResult(record.id, "This scan no longer exists.")
+                    return@launch
+                }
+                if ((diagnosisRevisions[record.id] ?: 0L) != diagnosisRevision) {
+                    setCloudVerificationResult(record.id, "Your correction was kept. Verify again to request a new assessment.")
                     return@launch
                 }
                 val saved = plantRecordRepository.save(current.applyCloudResults(speciesMatch, diseaseAssessment))
