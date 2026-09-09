@@ -211,4 +211,80 @@ class PlantViewModelTest {
         assertEquals(saved, state.record)
         coVerify(exactly = 0) { diseaseVerifier.assess(any()) }
     }
+
+    @Test
+    fun `correct diagnosis rejects unsupported species without saving`() = runTest {
+        val vm = createViewModel()
+
+        vm.correctDiagnosis(unsupportedBananaScan(), correctedSpecies = "Banana", correctedLabel = null)
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { plantRecordRepository.save(any()) }
+        assertTrue(vm.scanState.value is ScanState.Idle)
+    }
+
+    @Test
+    fun `correct diagnosis rejects a label from a different species`() = runTest {
+        val vm = createViewModel()
+
+        vm.correctDiagnosis(unsupportedBananaScan(), correctedSpecies = "Corn", correctedLabel = "Tomato___Late_blight")
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { plantRecordRepository.save(any()) }
+        assertTrue(vm.scanState.value is ScanState.Idle)
+    }
+
+    @Test
+    fun `correct diagnosis saves a matching label with the correction prefix`() = runTest {
+        val vm = createViewModel()
+
+        vm.correctDiagnosis(unsupportedBananaScan(), correctedSpecies = "Tomato", correctedLabel = "Tomato___Late_blight")
+        advanceUntilIdle()
+
+        val saved = savedRecord.captured
+        assertEquals("Tomato", saved.detectedSpecies)
+        assertEquals("user_corrected:Tomato___Late_blight", saved.onDeviceLabel)
+        assertEquals("Late blight", saved.diseaseName)
+        assertFalse(saved.isHealthy)
+        assertNull(saved.cloudLabel)
+        assertFalse(saved.isCloudVerified)
+        assertFalse(saved.hasHealthAssessment)
+    }
+
+    @Test
+    fun `species-only correction is stored as an unknown diagnosis`() = runTest {
+        val vm = createViewModel()
+
+        vm.correctDiagnosis(unsupportedBananaScan(), correctedSpecies = "Apple", correctedLabel = null)
+        advanceUntilIdle()
+
+        val saved = savedRecord.captured
+        assertEquals("user_corrected_unknown:Apple", saved.onDeviceLabel)
+        assertNull(saved.diseaseName)
+        assertFalse(saved.isHealthy)
+    }
+
+    @Test
+    fun `correcting after a cloud result downgrades to a final on-device verdict`() = runTest {
+        val vm = createViewModel()
+        coEvery { cascadeClassifier.diagnose(bitmap) } returns
+            CascadeClassifier.Verdict.NeedsSecondOpinion(
+                ClassPrediction("Tomato___healthy", 0.55f),
+                ClassPrediction("Tomato___Late_blight", 0.44f),
+            )
+        coEvery { speciesIdentifier.identify(bitmap) } returns SpeciesMatch("Tomato", "Lycopersicon esculentum", 0.88f, isSupported = true)
+        coEvery { diseaseVerifier.assess(bitmap) } returns DiseaseAssessment(isHealthy = true, diseaseName = null, confidence = 0.9f)
+        vm.scan(bitmap)
+        advanceUntilIdle()
+        assertTrue(vm.scanState.value is ScanState.CloudResult)
+
+        val scanned = (vm.scanState.value as ScanState.CloudResult).record
+        vm.correctDiagnosis(scanned, correctedSpecies = "Corn", correctedLabel = "Corn___Northern_Leaf_Blight")
+        advanceUntilIdle()
+
+        val state = vm.scanState.value as ScanState.OnDeviceResult
+        assertFalse(state.needsCloud)
+        assertEquals("user_corrected:Corn___Northern_Leaf_Blight", state.record.onDeviceLabel)
+        assertEquals("Corn", state.record.detectedSpecies)
+    }
 }
