@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 
 sealed class ScanState {
     object Idle : ScanState()                          // Nothing happening
+    data class Failed(val message: String) : ScanState()
     object Scanning : ScanState()                      // TFLite is running
     data class OnDeviceResult(                         // TFLite finished
         val record: PlantRecord,
@@ -64,6 +65,8 @@ class PlantViewModel(
     private val _scanState = MutableStateFlow<ScanState>(ScanState.Idle)
     val scanState: StateFlow<ScanState> = _scanState.asStateFlow()
 
+    private var retryScan: (() -> Unit)? = null
+
     private val diagnosisRevisions = mutableMapOf<Long, Long>()
 
     private val _cloudVerificationState = MutableStateFlow<CloudVerificationState?>(null)
@@ -95,102 +98,114 @@ class PlantViewModel(
      * the final, unverified verdict.
      */
     fun scan(photo: Bitmap) {
-        viewModelScope.launch {
-            _scanState.update { ScanState.Scanning }
-            val verdict = cascadeClassifier.diagnose(photo)
-            val parsed = PlantLabels.parse(verdict.prediction.label)
-            var record =
-                plantRecordRepository.saveScan(
-                    photo = photo,
-                    record =
-                        PlantRecord(
-                            detectedSpecies = parsed.species,
-                            commonName = parsed.species,
-                            diseaseName = parsed.disease,
-                            isHealthy = parsed.isHealthy,
-                            confidence = verdict.prediction.confidence,
-                            onDeviceLabel = verdict.prediction.label,
-                        ),
+        launchScan(retry = { scan(photo) }) { performScan(photo) }
+    }
+
+    private suspend fun performScan(photo: Bitmap) {
+        val verdict = cascadeClassifier.diagnose(photo)
+        val parsed = PlantLabels.parse(verdict.prediction.label)
+        var record =
+            plantRecordRepository.saveScan(
+                photo = photo,
+                record =
+                    PlantRecord(
+                        detectedSpecies = parsed.species,
+                        commonName = parsed.species,
+                        diseaseName = parsed.disease,
+                        isHealthy = parsed.isHealthy,
+                        confidence = verdict.prediction.confidence,
+                        onDeviceLabel = verdict.prediction.label,
+                    ),
+            )
+
+        if (verdict is CascadeClassifier.Verdict.Confident) {
+            _scanState.update { ScanState.OnDeviceResult(record, needsCloud = false) }
+            return
+        }
+
+        // Needs second opinion: show that step, then merge the cloud answers.
+        _scanState.update { ScanState.OnDeviceResult(record, needsCloud = true) }
+        val speciesMatch = speciesIdentifier.identify(photo)
+        if (speciesMatch != null && !speciesMatch.isSupported) {
+            // Species outside v1.0 (Banana/Avocado/Mango): rewrite the
+            // record as an unsupported scan feeding the v2.0 wishlist.
+            record =
+                plantRecordRepository.save(
+                    record.copy(
+                        detectedSpecies = speciesMatch.commonName,
+                        commonName = speciesMatch.commonName,
+                        cloudLabel = speciesMatch.scientificName,
+                        isSupported = false,
+                        isCloudVerified = false,
+                        confidence = speciesMatch.confidence,
+                    ),
                 )
+            _scanState.update { ScanState.Unsupported(speciesMatch.commonName, record) }
+            return
+        }
 
-            if (verdict is CascadeClassifier.Verdict.Confident) {
-                _scanState.update { ScanState.OnDeviceResult(record, needsCloud = false) }
-                return@launch
-            }
+        if (speciesMatch != null) {
+            // Cloud agrees the crop is supported: verify the species on the
+            // record and keep the higher of the two confidences.
+            record =
+                plantRecordRepository.save(
+                    record.copy(
+                        detectedSpecies = speciesMatch.commonName,
+                        commonName = speciesMatch.commonName,
+                    ),
+                )
+        }
 
-            // Needs second opinion: show that step, then merge the cloud answers.
-            _scanState.update { ScanState.OnDeviceResult(record, needsCloud = true) }
-            val speciesMatch = speciesIdentifier.identify(photo)
-            if (speciesMatch != null && !speciesMatch.isSupported) {
-                // Species outside v1.0 (Banana/Avocado/Mango): rewrite the
-                // record as an unsupported scan feeding the v2.0 wishlist.
-                record =
-                    plantRecordRepository.save(
-                        record.copy(
-                            detectedSpecies = speciesMatch.commonName,
-                            commonName = speciesMatch.commonName,
-                            cloudLabel = speciesMatch.scientificName,
-                            isSupported = false,
-                            isCloudVerified = false,
-                            confidence = speciesMatch.confidence,
-                        ),
-                    )
-                _scanState.update { ScanState.Unsupported(speciesMatch.commonName, record) }
-                return@launch
-            }
+        // Disease-level second opinion (Plant.id): confirms or corrects the
+        // on-device disease verdict. Runs even when Pl@ntNet was unavailable
+        // — the keys are independent and only the gate decides cost.
+        val assessment = diseaseVerifier.assess(photo)
+        if (assessment != null) {
+            record =
+                plantRecordRepository.save(
+                    record.copy(
+                        isHealthy = assessment.isHealthy,
+                        diseaseName =
+                            if (assessment.isHealthy) {
+                                null
+                            } else {
+                                assessment.diseaseName ?: record.diseaseName
+                            },
+                        cloudLabel = assessment.diseaseName ?: "Healthy",
+                        isCloudVerified = true,
+                        hasHealthAssessment = true,
+                        confidence = maxOf(record.confidence, assessment.confidence),
+                    ),
+                )
+        }
+        _scanState.update { ScanState.CloudResult(record) }
+    }
 
-            if (speciesMatch != null) {
-                // Cloud agrees the crop is supported: verify the species on the
-                // record and keep the higher of the two confidences.
-                record =
-                    plantRecordRepository.save(
-                        record.copy(
-                            detectedSpecies = speciesMatch.commonName,
-                            commonName = speciesMatch.commonName,
-                        ),
-                    )
-            }
-
-            // Disease-level second opinion (Plant.id): confirms or corrects the
-            // on-device disease verdict. Runs even when Pl@ntNet was unavailable
-            // — the keys are independent and only the gate decides cost.
-            val assessment = diseaseVerifier.assess(photo)
-            if (assessment != null) {
-                record =
-                    plantRecordRepository.save(
-                        record.copy(
-                            isHealthy = assessment.isHealthy,
-                            diseaseName =
-                                if (assessment.isHealthy) {
-                                    null
-                                } else {
-                                    assessment.diseaseName ?: record.diseaseName
-                                },
-                            cloudLabel = assessment.diseaseName ?: "Healthy",
-                            isCloudVerified = true,
-                            hasHealthAssessment = true,
-                            confidence = maxOf(record.confidence, assessment.confidence),
-                        ),
-                    )
-            }
-            _scanState.update { ScanState.CloudResult(record) }
+    /** Gallery imports use the same error handling and retry path as camera scans. */
+    fun scan(photoUri: Uri) {
+        launchScan(retry = { scan(photoUri) }) {
+            val bitmap = plantRecordRepository.decode(photoUri)
+                ?: throw IllegalArgumentException("Unreadable image")
+            performScan(bitmap)
         }
     }
 
-    /** Gallery import: classify the decoded bitmap, or store an unclassifiable marker. */
-    fun scan(photoUri: Uri) {
+    fun retryFailedScan() {
+        if (_scanState.value is ScanState.Failed) retryScan?.invoke()
+    }
+
+    private fun launchScan(retry: () -> Unit, operation: suspend () -> Unit) {
+        retryScan = retry
+        // Clear the previous result before navigation can observe it.
+        _scanState.value = ScanState.Scanning
         viewModelScope.launch {
-            // Decoding can take a moment; without this the Analyzing screen would
-            // land on the previous scan's terminal state and show its result.
-            _scanState.update { ScanState.Scanning }
-            val bitmap = plantRecordRepository.decode(photoUri)
-            if (bitmap != null) {
-                scan(bitmap)
-            } else {
-                saveScan(
-                    photoUri,
-                    PlantRecord(detectedSpecies = "Unknown", onDeviceLabel = "unreadable_image"),
-                )
+            try {
+                operation()
+                retryScan = null
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                _scanState.value = ScanState.Failed("Could not analyze or save this photo. Try again or choose another photo.")
             }
         }
     }
@@ -407,13 +422,4 @@ class PlantViewModel(
         }
     }
 
-    /** Persists an unclassifiable gallery import as a marker record. */
-    private suspend fun saveScan(
-        photoUri: Uri,
-        record: PlantRecord,
-    ) {
-        _scanState.update { ScanState.Scanning }
-        val saved = plantRecordRepository.saveScan(photoUri, record)
-        _scanState.update { ScanState.Saved(saved) }
-    }
 }

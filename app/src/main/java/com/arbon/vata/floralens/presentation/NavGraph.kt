@@ -1,6 +1,9 @@
 package com.arbon.vata.floralens.presentation
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.History
@@ -24,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavDestination
@@ -174,6 +178,13 @@ fun PlantDoctorNavGraph(
                 }
 
                 when (val s = state) {
+                    is ScanState.Failed -> Column(Modifier.padding(24.dp)) {
+                        Text(s.message)
+                        Button(onClick = vm::retryFailedScan) { Text("Try again") }
+                        OutlinedButton(onClick = { navController.popBackStack(Screen.Camera.route, inclusive = false) }) {
+                            Text("Choose another photo")
+                        }
+                    }
                     is ScanState.Scanning, ScanState.Idle ->
                         AnalyzingScreen(step = AnalyzingStep.ON_DEVICE)
                     is ScanState.OnDeviceResult ->

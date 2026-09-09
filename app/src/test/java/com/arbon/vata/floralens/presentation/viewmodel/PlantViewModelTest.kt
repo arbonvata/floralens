@@ -273,7 +273,55 @@ class PlantViewModelTest {
         advanceUntilIdle()
 
         assertEquals(listOf<ScanState>(ScanState.Scanning), stateAtDecode)
-        assertTrue(vm.scanState.value is ScanState.Saved)
+        assertTrue(vm.scanState.value is ScanState.Failed)
+    }
+
+    @Test
+    fun `classification failure can be retried successfully`() = runTest {
+        val vm = createViewModel()
+        coEvery { cascadeClassifier.diagnose(bitmap) } throws IllegalStateException("Model failed")
+        vm.scan(bitmap)
+        advanceUntilIdle()
+        assertTrue(vm.scanState.value is ScanState.Failed)
+
+        coEvery { cascadeClassifier.diagnose(bitmap) } returns CascadeClassifier.Verdict.Confident(
+            ClassPrediction("Tomato___healthy", 0.95f), null,
+        )
+        vm.retryFailedScan()
+        assertTrue(vm.scanState.value is ScanState.Scanning)
+        advanceUntilIdle()
+        assertTrue(vm.scanState.value is ScanState.OnDeviceResult)
+    }
+
+    @Test
+    fun `gallery decode exception becomes a retryable failure`() = runTest {
+        val vm = createViewModel()
+        coEvery { plantRecordRepository.decode(any<Uri>()) } throws SecurityException("Access denied")
+        vm.scan(mockk<Uri>())
+        advanceUntilIdle()
+        assertTrue(vm.scanState.value is ScanState.Failed)
+        coVerify(exactly = 0) { cascadeClassifier.diagnose(any()) }
+    }
+
+    @Test
+    fun `photo save failure becomes a retryable failure`() = runTest {
+        val vm = createViewModel()
+        coEvery { cascadeClassifier.diagnose(bitmap) } returns CascadeClassifier.Verdict.Confident(
+            ClassPrediction("Tomato___healthy", 0.95f), null,
+        )
+        coEvery { plantRecordRepository.saveScan(any<Bitmap>(), any()) } throws java.io.IOException("Disk full")
+        vm.scan(bitmap)
+        advanceUntilIdle()
+        assertTrue(vm.scanState.value is ScanState.Failed)
+    }
+
+    @Test
+    fun `scan cancellation is not presented as a failure`() = runTest {
+        val vm = createViewModel()
+        coEvery { cascadeClassifier.diagnose(bitmap) } throws kotlinx.coroutines.CancellationException()
+        vm.scan(bitmap)
+        advanceUntilIdle()
+        assertFalse(vm.scanState.value is ScanState.Failed)
     }
 
     @Test
