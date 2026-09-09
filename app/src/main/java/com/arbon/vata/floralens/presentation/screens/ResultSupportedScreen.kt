@@ -149,17 +149,16 @@ fun ResultSupportedScreen(
                 modifier = Modifier.padding(top = 8.dp),
             )
         }
-        Text("What to do:", style = MaterialTheme.typography.titleSmall)
+        Text("Next steps", style = MaterialTheme.typography.titleSmall)
         Spacer(Modifier.height(8.dp))
         Card {
             Column(Modifier.padding(12.dp)) {
                 if (record.isDiagnosisUnknown()) {
                     Text("No disease advice is shown because the diagnosis is unknown.")
+                } else if (record.isHealthy) {
+                    Text("No disease treatment is suggested for this healthy result. Keep monitoring your plant.")
                 } else {
-                    Text("• Remove affected leaves")
-                    Text("• Avoid overhead watering")
-                    Text("• Copper fungicide if spreads")
-                    Text("• Malmö weather: Don't water today, rain tomorrow")
+                    Text("Treatment guidance is not available for this diagnosis yet. Confirm the diagnosis before choosing a treatment.")
                 }
             }
         }
