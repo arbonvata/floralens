@@ -5,16 +5,19 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arbon.vata.floralens.data.objectbox.PlantRecord
+import com.arbon.vata.floralens.data.objectbox.UNKNOWN_DIAGNOSIS_LABEL_PREFIX
 import com.arbon.vata.floralens.data.objectbox.USER_CORRECTED_LABEL_PREFIX
 import com.arbon.vata.floralens.data.objectbox.USER_CORRECTED_UNKNOWN_LABEL_PREFIX
+import com.arbon.vata.floralens.data.objectbox.classifierLabel
 import com.arbon.vata.floralens.data.repository.OnboardingRepository
 import com.arbon.vata.floralens.data.repository.PlantRecordRepository
 import com.arbon.vata.floralens.domain.classifier.CascadeClassifier
 import com.arbon.vata.floralens.domain.classifier.PlantLabels
 import com.arbon.vata.floralens.domain.diagnosis.DiseaseAssessment
 import com.arbon.vata.floralens.domain.diagnosis.DiseaseVerifier
-import com.arbon.vata.floralens.domain.species.SpeciesMatch
+import com.arbon.vata.floralens.domain.photos.PhotoRegion
 import com.arbon.vata.floralens.domain.species.SpeciesIdentifier
+import com.arbon.vata.floralens.domain.species.SpeciesMatch
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -97,12 +100,22 @@ class PlantViewModel(
      * Unavailable cloud stages (offline / no key) leave the on-device result as
      * the final, unverified verdict.
      */
-    fun scan(photo: Bitmap) {
-        launchScan(retry = { scan(photo) }) { performScan(photo) }
+    fun scan(photo: Bitmap, focusRegion: PhotoRegion? = null) {
+        launchScan(retry = { scan(photo, focusRegion) }) { performScan(photo, focusRegion) }
     }
 
-    private suspend fun performScan(photo: Bitmap) {
-        val verdict = cascadeClassifier.diagnose(photo)
+    private suspend fun performScan(photo: Bitmap, focusRegion: PhotoRegion? = null) {
+        val region = focusRegion?.clampedTo(photo.width, photo.height)
+        val modelInput =
+            if (region == null) photo else Bitmap.createBitmap(
+                photo, region.left, region.top, region.right - region.left, region.bottom - region.top,
+            )
+        val verdict =
+            try {
+                cascadeClassifier.diagnose(modelInput)
+            } finally {
+                if (modelInput !== photo) modelInput.recycle()
+            }
         val parsed = PlantLabels.parse(verdict.prediction.label)
         var record =
             plantRecordRepository.saveScan(
@@ -126,34 +139,12 @@ class PlantViewModel(
         // Needs second opinion: show that step, then merge the cloud answers.
         _scanState.update { ScanState.OnDeviceResult(record, needsCloud = true) }
         val speciesMatch = speciesIdentifier.identify(photo)
-        if (speciesMatch != null && !speciesMatch.isSupported) {
-            // Species outside v1.0 (Banana/Avocado/Mango): rewrite the
-            // record as an unsupported scan feeding the v2.0 wishlist.
-            record =
-                plantRecordRepository.save(
-                    record.copy(
-                        detectedSpecies = speciesMatch.commonName,
-                        commonName = speciesMatch.commonName,
-                        cloudLabel = speciesMatch.scientificName,
-                        isSupported = false,
-                        isCloudVerified = false,
-                        confidence = speciesMatch.confidence,
-                    ),
-                )
-            _scanState.update { ScanState.Unsupported(speciesMatch.commonName, record) }
-            return
-        }
-
         if (speciesMatch != null) {
-            // Cloud agrees the crop is supported: verify the species on the
-            // record and keep the higher of the two confidences.
-            record =
-                plantRecordRepository.save(
-                    record.copy(
-                        detectedSpecies = speciesMatch.commonName,
-                        commonName = speciesMatch.commonName,
-                    ),
-                )
+            record = plantRecordRepository.save(record.applyCloudResults(speciesMatch, null))
+            if (!speciesMatch.isSupported) {
+                _scanState.value = ScanState.Unsupported(speciesMatch.commonName, record)
+                return
+            }
         }
 
         // Disease-level second opinion (Plant.id): confirms or corrects the
@@ -161,22 +152,7 @@ class PlantViewModel(
         // — the keys are independent and only the gate decides cost.
         val assessment = diseaseVerifier.assess(photo)
         if (assessment != null) {
-            record =
-                plantRecordRepository.save(
-                    record.copy(
-                        isHealthy = assessment.isHealthy,
-                        diseaseName =
-                            if (assessment.isHealthy) {
-                                null
-                            } else {
-                                assessment.diseaseName ?: record.diseaseName
-                            },
-                        cloudLabel = assessment.diseaseName ?: "Healthy",
-                        isCloudVerified = true,
-                        hasHealthAssessment = true,
-                        confidence = maxOf(record.confidence, assessment.confidence),
-                    ),
-                )
+            record = plantRecordRepository.save(record.applyCloudResults(null, assessment))
         }
         _scanState.update { ScanState.CloudResult(record) }
     }
@@ -336,6 +312,18 @@ class PlantViewModel(
     ): PlantRecord {
         var updated = this
         if (speciesMatch != null) {
+            // PlantNetClient maps scientific names to the same canonical crop names as PlantLabels.
+            val speciesChanged = !speciesMatch.commonName.equals(updated.detectedSpecies, ignoreCase = true)
+            if (speciesChanged) {
+                updated = updated.copy(
+                    diseaseName = null,
+                    isHealthy = false,
+                    isCloudVerified = false,
+                    hasHealthAssessment = false,
+                    onDeviceLabel = UNKNOWN_DIAGNOSIS_LABEL_PREFIX + updated.classifierLabel(),
+                    confidence = 0f,
+                )
+            }
             updated =
                 updated.copy(
                     detectedSpecies = speciesMatch.commonName,
@@ -359,6 +347,7 @@ class PlantViewModel(
                     onDeviceLabel =
                         if (updated.isSupported) {
                             updated.onDeviceLabel
+                                .removePrefix(UNKNOWN_DIAGNOSIS_LABEL_PREFIX)
                                 .removePrefix(USER_CORRECTED_LABEL_PREFIX)
                                 .removePrefix(USER_CORRECTED_UNKNOWN_LABEL_PREFIX)
                         } else {

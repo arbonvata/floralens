@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.arbon.vata.floralens.data.objectbox.isDiagnosisUnknown
 import com.arbon.vata.floralens.data.objectbox.PlantRecord
 import com.arbon.vata.floralens.data.objectbox.isUserCorrected
 import com.arbon.vata.floralens.presentation.testdata.historyPreviewRecords
@@ -59,6 +60,7 @@ private fun PlantRecord.matches(filter: HistoryFilter): Boolean =
 /** Low-confidence results get the yellow flag even when classified healthy. */
 private fun PlantRecord.healthBadge(): String = when {
     isUserCorrected() -> "✏️"
+    isDiagnosisUnknown() -> "⚪"
     !isHealthy -> "🔴"
     confidence < 0.80f -> "🟡"
     else -> "🟢"
@@ -208,7 +210,7 @@ private fun HistoryGridItem(
             overflow = TextOverflow.Ellipsis,
         )
         Text(
-            if (record.isUserCorrected()) "Corrected" else "${(record.confidence * 100).toInt()}%",
+            if (record.isDiagnosisUnknown()) "Diagnosis unknown" else if (record.isUserCorrected()) "Corrected" else "${(record.confidence * 100).toInt()}%",
             style = MaterialTheme.typography.labelSmall,
         )
     }

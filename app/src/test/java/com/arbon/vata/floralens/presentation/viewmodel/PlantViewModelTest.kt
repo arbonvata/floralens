@@ -3,28 +3,33 @@ package com.arbon.vata.floralens.presentation.viewmodel
 import android.graphics.Bitmap
 import android.net.Uri
 import com.arbon.vata.floralens.data.objectbox.PlantRecord
+import com.arbon.vata.floralens.data.objectbox.isDiagnosisUnknown
 import com.arbon.vata.floralens.data.repository.OnboardingRepository
 import com.arbon.vata.floralens.data.repository.PlantRecordRepository
 import com.arbon.vata.floralens.domain.classifier.CascadeClassifier
 import com.arbon.vata.floralens.domain.classifier.ClassPrediction
 import com.arbon.vata.floralens.domain.diagnosis.DiseaseAssessment
 import com.arbon.vata.floralens.domain.diagnosis.DiseaseVerifier
-import com.arbon.vata.floralens.domain.species.SpeciesMatch
+import com.arbon.vata.floralens.domain.photos.PhotoRegion
 import com.arbon.vata.floralens.domain.species.SpeciesIdentifier
+import com.arbon.vata.floralens.domain.species.SpeciesMatch
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.unmockkStatic
+import io.mockk.verify
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.jupiter.api.AfterEach
@@ -257,6 +262,106 @@ class PlantViewModelTest {
         assertEquals("Banana", (state as ScanState.Unsupported).species)
         assertEquals(saved, state.record)
         coVerify(exactly = 0) { diseaseVerifier.assess(any()) }
+    }
+
+    @Test
+    fun `species change without health assessment clears the previous crop diagnosis`() = runTest {
+        val vm = createViewModel()
+        coEvery { cascadeClassifier.diagnose(bitmap) } returns CascadeClassifier.Verdict.NeedsSecondOpinion(
+            ClassPrediction("Tomato___Late_blight", 0.7f), null,
+        )
+        coEvery { speciesIdentifier.identify(bitmap) } returns SpeciesMatch("Potato", "Solanum tuberosum", 0.9f, true)
+        coEvery { diseaseVerifier.assess(bitmap) } returns null
+
+        vm.scan(bitmap)
+        advanceUntilIdle()
+
+        val record = (vm.scanState.value as ScanState.CloudResult).record
+        assertEquals("Potato", record.detectedSpecies)
+        assertNull(record.diseaseName)
+        assertTrue(record.isDiagnosisUnknown())
+        assertFalse(record.isHealthy)
+        assertFalse(record.hasHealthAssessment)
+    }
+
+    @Test
+    fun `manual species change invalidates an old health assessment`() = runTest {
+        val vm = createViewModel()
+        val record = PlantRecord(id = 7, detectedSpecies = "Tomato", commonName = "Tomato",
+            onDeviceLabel = "Tomato___Late_blight", diseaseName = "Late blight",
+            isHealthy = false, isCloudVerified = true, hasHealthAssessment = true, photoPath = "scan.jpg")
+        coEvery { plantRecordRepository.get(7L) } returns record
+        coEvery { speciesIdentifier.identify(bitmap) } returns SpeciesMatch("Potato", "Solanum tuberosum", 0.9f, true)
+        coEvery { diseaseVerifier.assess(bitmap) } returns null
+
+        vm.verifyWithCloud(record)
+        advanceUntilIdle()
+
+        assertTrue(savedRecord.captured.isDiagnosisUnknown())
+        assertNull(savedRecord.captured.diseaseName)
+        assertFalse(savedRecord.captured.isCloudVerified)
+        assertFalse(savedRecord.captured.hasHealthAssessment)
+    }
+
+    @Test
+    fun `cloud diagnosis uses its own lower confidence and resolves unknown status`() = runTest {
+        val vm = createViewModel()
+        coEvery { cascadeClassifier.diagnose(bitmap) } returns CascadeClassifier.Verdict.NeedsSecondOpinion(
+            ClassPrediction("Tomato___Late_blight", 0.79f), null,
+        )
+        coEvery { speciesIdentifier.identify(bitmap) } returns SpeciesMatch("Potato", "Solanum tuberosum", 0.9f, true)
+        coEvery { diseaseVerifier.assess(bitmap) } returns DiseaseAssessment(true, null, 0.6f)
+
+        vm.scan(bitmap)
+        advanceUntilIdle()
+
+        val record = (vm.scanState.value as ScanState.CloudResult).record
+        assertTrue(record.isHealthy)
+        assertFalse(record.isDiagnosisUnknown())
+        assertEquals(0.6f, record.confidence)
+        assertTrue(record.hasHealthAssessment)
+    }
+
+    @Test
+    fun `same species cloud diagnosis never inherits the offline confidence`() = runTest {
+        val vm = createViewModel()
+        coEvery { cascadeClassifier.diagnose(bitmap) } returns CascadeClassifier.Verdict.NeedsSecondOpinion(
+            ClassPrediction("Tomato___Late_blight", 0.79f), null,
+        )
+        coEvery { speciesIdentifier.identify(bitmap) } returns SpeciesMatch("Tomato", "Solanum lycopersicum", 0.9f, true)
+        coEvery { diseaseVerifier.assess(bitmap) } returns DiseaseAssessment(true, null, 0.6f)
+        vm.scan(bitmap)
+        advanceUntilIdle()
+        assertEquals(0.6f, (vm.scanState.value as ScanState.CloudResult).record.confidence)
+    }
+
+    @Test
+    fun `camera focus crop goes only to the offline model while full photo is saved and uploaded`() = runTest {
+        val vm = createViewModel()
+        val crop = mockk<Bitmap>(relaxed = true)
+        every { bitmap.width } returns 1000
+        every { bitmap.height } returns 800
+        mockkStatic(Bitmap::class)
+        try {
+            every { Bitmap.createBitmap(bitmap, 200, 100, 400, 400) } returns crop
+            coEvery { cascadeClassifier.diagnose(crop) } returns CascadeClassifier.Verdict.NeedsSecondOpinion(
+                ClassPrediction("Tomato___healthy", 0.6f), null,
+            )
+            coEvery { speciesIdentifier.identify(bitmap) } returns null
+            coEvery { diseaseVerifier.assess(bitmap) } returns null
+
+            vm.scan(bitmap, PhotoRegion(200, 100, 600, 500))
+            advanceUntilIdle()
+
+            coVerify(exactly = 1) { cascadeClassifier.diagnose(crop) }
+            coVerify(exactly = 1) { plantRecordRepository.saveScan(bitmap, any()) }
+            coVerify(exactly = 1) { speciesIdentifier.identify(bitmap) }
+            coVerify(exactly = 1) { diseaseVerifier.assess(bitmap) }
+            verify(exactly = 1) { crop.recycle() }
+            verify(exactly = 0) { bitmap.recycle() }
+        } finally {
+            unmockkStatic(Bitmap::class)
+        }
     }
 
     @Test

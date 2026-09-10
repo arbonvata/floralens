@@ -80,7 +80,7 @@ fun ResultSupportedScreen(
                     )
                     if (record.isUserCorrected()) {
                         AssistChip(onClick = {}, label = { Text("Corrected by you") })
-                    } else {
+                    } else if (!record.isDiagnosisUnknown()) {
                         AssistChip(onClick = {}, label = { Text("${(record.confidence*100).toInt()}% confidence") })
                     }
                     if(record.isCloudVerified) AssistChip(onClick = {}, label = { Text("☁️ Cloud verified") })
@@ -94,7 +94,7 @@ fun ResultSupportedScreen(
                     },
                     style = MaterialTheme.typography.titleMedium,
                 )
-                if (!record.isUserCorrected()) {
+                if (!record.isUserCorrected() && !record.isDiagnosisUnknown()) {
                     LinearProgressIndicator(
                         progress = { record.confidence },
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),

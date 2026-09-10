@@ -118,7 +118,9 @@ private fun PlantProfileCard(
                 ) {
                     Text(dayFormat.format(Date(record.createdAt)), style = MaterialTheme.typography.labelMedium)
                     Text(
-                        if (record.isUserCorrected()) {
+                        if (record.isDiagnosisUnknown()) {
+                            "Diagnosis unknown"
+                        } else if (record.isUserCorrected()) {
                             "${verdictLabel(record)} • Corrected"
                         } else {
                             "${verdictLabel(record)} • ${(record.confidence * 100).toInt()}%"
@@ -131,10 +133,14 @@ private fun PlantProfileCard(
 
             Spacer(Modifier.height(8.dp))
             Text(
-                if (latest.isUserCorrected()) "Latest scan was corrected by you" else "Latest scan confidence",
+                when {
+                    latest.isDiagnosisUnknown() -> "Awaiting a health assessment"
+                    latest.isUserCorrected() -> "Latest scan was corrected by you"
+                    else -> "Latest scan confidence"
+                },
                 style = MaterialTheme.typography.labelSmall,
             )
-            if (!latest.isUserCorrected()) {
+            if (!latest.isUserCorrected() && !latest.isDiagnosisUnknown()) {
                 LinearProgressIndicator(
                     progress = { latest.confidence },
                     modifier = Modifier.fillMaxWidth().padding(top = 4.dp),

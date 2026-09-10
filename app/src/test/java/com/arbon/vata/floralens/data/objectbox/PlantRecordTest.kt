@@ -23,6 +23,14 @@ class PlantRecordTest {
     }
 
     @Test
+    fun `cloud species change is unknown without claiming a user correction`() {
+        val record = PlantRecord(onDeviceLabel = "cloud_unknown:Tomato___Late_blight")
+        assertTrue(record.isDiagnosisUnknown())
+        assertFalse(record.isUserCorrected())
+        assertEquals("Tomato___Late_blight", record.classifierLabel())
+    }
+
+    @Test
     fun `classifier label strips either prefix and leaves plain labels alone`() {
         assertEquals("Tomato___Late_blight", PlantRecord(onDeviceLabel = "user_corrected:Tomato___Late_blight").classifierLabel())
         assertEquals("Apple", PlantRecord(onDeviceLabel = "user_corrected_unknown:Apple").classifierLabel())

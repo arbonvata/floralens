@@ -5,8 +5,8 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.graphics.RectF
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -18,9 +18,13 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
+import androidx.camera.view.TransformExperimental
+import androidx.camera.view.transform.CoordinateTransform
+import androidx.camera.view.transform.ImageProxyTransformFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -47,6 +51,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -56,10 +62,13 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.arbon.vata.floralens.data.photos.PhotoDecoding
+import com.arbon.vata.floralens.domain.classifier.PlantLabels
+import com.arbon.vata.floralens.domain.photos.PhotoRegion
 
 @Composable
 fun CameraScreen(
-    onPhotoCaptured: (Bitmap) -> Unit = {},
+    onPhotoCaptured: (Bitmap, PhotoRegion?) -> Unit = { _, _ -> },
     onPhotoPicked: (Uri) -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -169,19 +178,20 @@ fun CameraScreen(
     }
 }
 
+@androidx.annotation.OptIn(TransformExperimental::class)
 @Composable
 private fun CameraContent(
     lifecycleOwner: androidx.lifecycle.LifecycleOwner,
-    onPhotoCaptured: (Bitmap) -> Unit,
+    onPhotoCaptured: (Bitmap, PhotoRegion?) -> Unit,
     onGalleryClick: () -> Unit,
 ) {
     if (androidx.compose.ui.platform.LocalInspectionMode.current) {
         Box(Modifier.fillMaxSize().background(Color.DarkGray)) {
             // Leaf guide
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Box(
                     Modifier
-                        .size(220.dp)
+                        .size(minOf(maxWidth * 0.7f, maxHeight * 0.65f))
                         .clip(MaterialTheme.shapes.large)
                         .background(Color.White.copy(alpha = 0.08f)),
                     contentAlignment = Alignment.Center,
@@ -192,7 +202,7 @@ private fun CameraContent(
 
             // Top pill
             Row(Modifier.align(Alignment.TopCenter).padding(top = 16.dp)) {
-                AssistChip(onClick = {}, label = { Text("14 plants supported offline • 40ms") })
+                AssistChip(onClick = {}, label = { Text("${PlantLabels.SUPPORTED_SPECIES.size} plants supported offline") })
             }
 
             // Bottom controls
@@ -229,6 +239,9 @@ private fun CameraContent(
                 setImageCaptureFlashMode(ImageCapture.FLASH_MODE_OFF)
             }
         }
+    var previewView by remember { mutableStateOf<PreviewView?>(null) }
+    var guideBounds by remember { mutableStateOf<RectF?>(null) }
+    var captureInProgress by remember { mutableStateOf(false) }
     var flashOn by remember { mutableStateOf(false) }
     var captureError by remember { mutableStateOf<String?>(null) }
 
@@ -236,15 +249,23 @@ private fun CameraContent(
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { ctx ->
-                PreviewView(ctx).apply { this.controller = controller }
+                PreviewView(ctx).apply {
+                    implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+                    this.controller = controller
+                    previewView = this
+                }
             },
         )
 
         // Leaf guide
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Box(
                 Modifier
-                    .size(220.dp)
+                    .size(minOf(maxWidth * 0.7f, maxHeight * 0.65f))
+                    .onGloballyPositioned { coordinates ->
+                        val bounds = coordinates.boundsInParent()
+                        guideBounds = RectF(bounds.left, bounds.top, bounds.right, bounds.bottom)
+                    }
                     .clip(MaterialTheme.shapes.large)
                     .background(Color.White.copy(alpha = 0.08f)),
                 contentAlignment = Alignment.Center,
@@ -255,7 +276,14 @@ private fun CameraContent(
 
         // Top pill
         Row(Modifier.align(Alignment.TopCenter).padding(top = 16.dp)) {
-            AssistChip(onClick = {}, label = { Text("14 plants supported offline • 40ms") })
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                AssistChip(onClick = {}, label = { Text("${PlantLabels.SUPPORTED_SPECIES.size} plants supported offline") })
+                Text(
+                    "Fill the guide with one leaf. Use a plain background and soft daylight.",
+                    color = Color.White,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
+            }
         }
 
         captureError?.let { error ->
@@ -274,17 +302,49 @@ private fun CameraContent(
         ) {
             FilledTonalButton(onClick = onGalleryClick) { Text("Gallery") }
             Button(
+                enabled = !captureInProgress,
                 onClick = {
+                    val previewTransform = previewView?.outputTransform
+                    val guide = guideBounds?.let { RectF(it) }
+                    if (previewTransform == null || guide == null) {
+                        captureError = "Camera is getting ready. Please try again."
+                        return@Button
+                    }
+                    captureInProgress = true
+                    captureError = null
                     controller.takePicture(
                         ContextCompat.getMainExecutor(context),
                         object : ImageCapture.OnImageCapturedCallback() {
                             override fun onCaptureSuccess(image: ImageProxy) {
-                                val bitmap = image.toRotatedBitmap()
-                                image.close()
-                                onPhotoCaptured(bitmap)
+                                try {
+                                    // Map the visible guide into the full upright capture, including
+                                    // CameraX's viewport crop and sensor rotation.
+                                    val output = ImageProxyTransformFactory().apply {
+                                        isUsingRotationDegrees = true
+                                    }.getOutputTransform(image)
+                                    val mappedGuide = RectF(guide)
+                                    CoordinateTransform(previewTransform, output).mapRect(mappedGuide)
+                                    val bitmap = image.toRotatedBitmap()
+                                    val rotated = image.imageInfo.rotationDegrees % 180 != 0
+                                    val fullWidth = if (rotated) image.height else image.width
+                                    val fullHeight = if (rotated) image.width else image.height
+                                    val sx = bitmap.width.toFloat() / fullWidth
+                                    val sy = bitmap.height.toFloat() / fullHeight
+                                    val region = PhotoRegion(
+                                        (mappedGuide.left * sx).toInt(), (mappedGuide.top * sy).toInt(),
+                                        (mappedGuide.right * sx).toInt(), (mappedGuide.bottom * sy).toInt(),
+                                    ).clampedTo(bitmap.width, bitmap.height)
+                                    onPhotoCaptured(bitmap, region)
+                                } catch (_: Exception) {
+                                    captureError = "Could not read this photo. Please try again."
+                                } finally {
+                                    image.close()
+                                    captureInProgress = false
+                                }
                             }
 
                             override fun onError(exception: ImageCaptureException) {
+                                captureInProgress = false
                                 captureError = exception.message ?: "Capture failed"
                             }
                         },
@@ -314,14 +374,17 @@ private fun CameraContent(
 private fun ImageProxy.toRotatedBitmap(): Bitmap {
     val buffer = planes[0].buffer
     val bytes = ByteArray(buffer.remaining()).also(buffer::get)
-    val decoded = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+    val decoded = PhotoDecoding.decode { bytes.inputStream() }
+        ?: throw IllegalArgumentException("Unreadable camera image")
     val rotation = imageInfo.rotationDegrees
     if (rotation == 0) return decoded
     val matrix =
         Matrix().apply {
             postRotate(rotation.toFloat())
         }
-    return Bitmap.createBitmap(decoded, 0, 0, decoded.width, decoded.height, matrix, true)
+    val upright = Bitmap.createBitmap(decoded, 0, 0, decoded.width, decoded.height, matrix, true)
+    if (upright !== decoded) decoded.recycle()
+    return upright
 }
 
 @Preview(showBackground = true, name = "Camera")

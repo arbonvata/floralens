@@ -144,8 +144,8 @@ fun PlantDoctorNavGraph(
 
             composable(Screen.Camera.route) {
                 CameraScreen(
-                    onPhotoCaptured = { bitmap ->
-                        vm.scan(bitmap)
+                    onPhotoCaptured = { bitmap, focusRegion ->
+                        vm.scan(bitmap, focusRegion)
                         navController.navigate(Screen.Analyzing.route)
                     },
                     onPhotoPicked = { uri ->

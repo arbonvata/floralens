@@ -2,7 +2,6 @@ package com.arbon.vata.floralens.data.photos
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.ExifInterface
 import android.net.Uri
@@ -29,9 +28,9 @@ class ScanPhotoStore(
 
     /** Copies gallery-imported bytes without re-encoding, preserving EXIF/rotation metadata. */
     fun save(uri: Uri): String? {
-        val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: return null
+        val input = context.contentResolver.openInputStream(uri) ?: return null
         val file = newPhotoFile(extension = extensionOf(uri))
-        bytes.inputStream().use { input -> file.outputStream().use { input.copyTo(it) } }
+        input.use { source -> file.outputStream().use { source.copyTo(it) } }
         return file.relativePath()
     }
 
@@ -39,7 +38,7 @@ class ScanPhotoStore(
 
     /** Decodes a picked image for classification; handles EXIF rotation so downstream code sees an upright bitmap. */
     fun decode(uri: Uri): Bitmap? {
-        val bitmap = context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it) } ?: return null
+        val bitmap = PhotoDecoding.decode { context.contentResolver.openInputStream(uri) } ?: return null
         val orientation = try {
             context.contentResolver.openInputStream(uri)?.use { stream ->
                 val exif = ExifInterface(stream)
@@ -65,7 +64,9 @@ class ScanPhotoStore(
             ExifInterface.ORIENTATION_ROTATE_270 -> matrix.setRotate(270f)
             else -> return bitmap
         }
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+        val upright = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+        if (upright !== bitmap) bitmap.recycle()
+        return upright
     }
 
     private fun newPhotoFile(extension: String = "jpg"): File {
