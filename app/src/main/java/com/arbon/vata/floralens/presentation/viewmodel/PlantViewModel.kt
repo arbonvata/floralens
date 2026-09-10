@@ -43,9 +43,6 @@ sealed class ScanState {
         val species: String,
         val record: PlantRecord? = null,
     ) : ScanState()
-    data class Saved(                                  // Scan persisted to ObjectBox
-        val record: PlantRecord
-    ) : ScanState()
 }
 
 data class CloudVerificationState(

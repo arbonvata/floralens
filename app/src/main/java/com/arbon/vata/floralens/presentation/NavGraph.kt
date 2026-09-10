@@ -166,7 +166,6 @@ fun PlantDoctorNavGraph(
                             is ScanState.OnDeviceResult if (!s.needsCloud) -> Screen.ResultSupported.scanRoute()
                             is ScanState.CloudResult -> Screen.ResultSupported.scanRoute()
                             is ScanState.Unsupported -> Screen.ResultUnsupported.scanRoute()
-                            is ScanState.Saved -> Screen.History.route
                             else -> null
                         }
                     if (destinationRoute != null) {
