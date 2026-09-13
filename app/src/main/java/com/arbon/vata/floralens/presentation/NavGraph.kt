@@ -296,6 +296,7 @@ fun PlantDoctorNavGraph(
                 val photoStore: ScanPhotoStore = koinInject()
                 HistoryScreen(
                     records = records,
+                    onDeleteItem = vm::deleteRecord,
                     resolvePhoto = { record -> record.photoPath?.let(photoStore::file) },
                     onItemClick = { record ->
                         if (record.isSupported) {

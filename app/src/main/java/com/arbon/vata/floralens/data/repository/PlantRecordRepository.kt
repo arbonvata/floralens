@@ -80,6 +80,15 @@ class PlantRecordRepository(
             }
         }
 
+    /** Removes the persisted scan and cleans up its app-private photo. */
+    suspend fun delete(id: Long) = withContext(Dispatchers.IO) {
+        val record = plantRecordBox.get(id) ?: return@withContext
+        check(plantRecordBox.remove(id)) { "Could not remove scan" }
+        // Photo cleanup must not turn a successful database deletion into a failure.
+        record.photoPath?.let { path -> runCatching { photoStore.file(path).delete() } }
+        Unit
+    }
+
     /** One record by id; null when it no longer exists. */
     suspend fun get(id: Long): PlantRecord? =
         withContext(Dispatchers.IO) { plantRecordBox.get(id) }

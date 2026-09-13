@@ -67,6 +67,8 @@ class PlantViewModel(
 
     private var retryScan: (() -> Unit)? = null
 
+    private val deletedRecordIds = mutableSetOf<Long>()
+
     private val diagnosisRevisions = mutableMapOf<Long, Long>()
 
     private val _cloudVerificationState = MutableStateFlow<CloudVerificationState?>(null)
@@ -136,6 +138,7 @@ class PlantViewModel(
         // Needs second opinion: show that step, then merge the cloud answers.
         _scanState.update { ScanState.OnDeviceResult(record, needsCloud = true) }
         val speciesMatch = speciesIdentifier.identify(photo)
+        if (record.id in deletedRecordIds) return
         if (speciesMatch != null) {
             record = plantRecordRepository.save(record.applyCloudResults(speciesMatch, null))
             if (!speciesMatch.isSupported) {
@@ -148,6 +151,7 @@ class PlantViewModel(
         // on-device disease verdict. Runs even when Pl@ntNet was unavailable
         // — the keys are independent and only the gate decides cost.
         val assessment = diseaseVerifier.assess(photo)
+        if (record.id in deletedRecordIds) return
         if (assessment != null) {
             record = plantRecordRepository.save(record.applyCloudResults(null, assessment))
         }
@@ -182,6 +186,26 @@ class PlantViewModel(
             }
         }
     }
+
+    suspend fun deleteRecord(record: PlantRecord): Boolean =
+        try {
+            plantRecordRepository.delete(record.id)
+            deletedRecordIds.add(record.id)
+            _scanState.update { current ->
+                val activeId = when (current) {
+                    is ScanState.OnDeviceResult -> current.record.id
+                    is ScanState.CloudResult -> current.record.id
+                    is ScanState.Unsupported -> current.record?.id
+                    else -> null
+                }
+                if (activeId == record.id) ScanState.Idle else current
+            }
+            true
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            false
+        }
 
     fun toggleTracked(record: PlantRecord) {
         viewModelScope.launch {

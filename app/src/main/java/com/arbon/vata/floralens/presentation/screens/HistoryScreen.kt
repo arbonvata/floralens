@@ -17,6 +17,12 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -25,6 +31,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,7 +79,42 @@ fun HistoryScreen(
     records: List<PlantRecord> = historyPreviewRecords,
     resolvePhoto: (PlantRecord) -> Any? = { null },
     onItemClick: (PlantRecord) -> Unit = {},
+    onDeleteItem: suspend (PlantRecord) -> Boolean = { false },
 ) {
+    var pendingDelete by remember { mutableStateOf<PlantRecord?>(null) }
+    var deleting by remember { mutableStateOf(false) }
+    var deleteFailed by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    pendingDelete?.let { record ->
+        AlertDialog(
+            onDismissRequest = { if (!deleting) pendingDelete = null },
+            title = { Text("Remove scan?") },
+            text = {
+                Text(
+                    if (deleteFailed) "Could not remove this scan. Please try again."
+                    else "This permanently removes this scan and its photo, including from My Plants if tracked.",
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = !deleting,
+                    onClick = {
+                        deleting = true
+                        scope.launch {
+                            try {
+                                if (onDeleteItem(record)) pendingDelete = null else deleteFailed = true
+                            } finally {
+                                deleting = false
+                            }
+                        }
+                    },
+                ) { Text(if (deleting) "Removing…" else "Remove") }
+            },
+            dismissButton = {
+                TextButton(enabled = !deleting, onClick = { pendingDelete = null }) { Text("Cancel") }
+            },
+        )
+    }
     var filter by remember { mutableStateOf(HistoryFilter.ALL) }
     val filtered = records.filter { it.matches(filter) }
 
@@ -139,6 +182,10 @@ fun HistoryScreen(
                             record = record,
                             photo = resolvePhoto(record),
                             onClick = { onItemClick(record) },
+                            onDelete = {
+                                deleteFailed = false
+                                pendingDelete = record
+                            },
                         )
                     }
                 }
@@ -152,6 +199,7 @@ private fun HistoryGridItem(
     record: PlantRecord,
     photo: Any?,
     onClick: () -> Unit,
+    onDelete: () -> Unit,
 ) {
     Column(
         modifier =
@@ -177,6 +225,13 @@ private fun HistoryGridItem(
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier.align(Alignment.Center),
                 )
+            }
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier.align(Alignment.TopStart)
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f), RoundedCornerShape(8.dp)),
+            ) {
+                Icon(Icons.Default.Delete, contentDescription = "Remove ${record.commonName.ifEmpty { record.detectedSpecies }} scan")
             }
             Row(
                 modifier =

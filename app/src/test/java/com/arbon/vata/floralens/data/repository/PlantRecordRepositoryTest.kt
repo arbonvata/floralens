@@ -40,6 +40,30 @@ class PlantRecordRepositoryTest {
     }
 
     @Test
+    fun `delete removes persisted record and photo`() = runBlocking {
+        val photo = mockk<java.io.File>()
+        every { plantRecordBox.get(9L) } returns PlantRecord(id = 9, photoPath = "scan_photos/remove.jpg")
+        every { plantRecordBox.remove(9L) } returns true
+        every { photoStore.file("scan_photos/remove.jpg") } returns photo
+        every { photo.delete() } returns true
+
+        repository.delete(9L)
+
+        verify(exactly = 1) { plantRecordBox.remove(9L) }
+        verify(exactly = 1) { photo.delete() }
+    }
+
+    @Test
+    fun `delete missing record is harmless`() = runBlocking {
+        every { plantRecordBox.get(9L) } returns null
+
+        repository.delete(9L)
+
+        verify(exactly = 0) { plantRecordBox.remove(any<Long>()) }
+        verify(exactly = 0) { photoStore.file(any()) }
+    }
+
+    @Test
     fun `camera scan stores photo path, stamps timestamp and inserts as new record`() = runBlocking {
         val bitmap = mockk<Bitmap>()
         every { photoStore.save(bitmap) } returns "scan_photos/scan_123_00042.jpg"

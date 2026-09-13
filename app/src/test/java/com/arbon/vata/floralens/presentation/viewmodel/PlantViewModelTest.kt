@@ -103,6 +103,24 @@ class PlantViewModelTest {
     }
 
     @Test
+    fun `delete reports success after removing the record`() = runTest {
+        val vm = createViewModel()
+        coEvery { plantRecordRepository.delete(5L) } returns Unit
+
+        assertTrue(vm.deleteRecord(unsupportedBananaScan()))
+
+        coVerify(exactly = 1) { plantRecordRepository.delete(5L) }
+    }
+
+    @Test
+    fun `delete reports a repository failure for retry`() = runTest {
+        val vm = createViewModel()
+        coEvery { plantRecordRepository.delete(5L) } throws IllegalStateException("Database unavailable")
+
+        assertFalse(vm.deleteRecord(unsupportedBananaScan()))
+    }
+
+    @Test
     fun `unsupported second opinion skips species identification and preserves the record`() = runTest {
         val vm = createViewModel()
         coEvery { plantRecordRepository.get(5L) } returns unsupportedBananaScan()
