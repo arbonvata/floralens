@@ -14,6 +14,7 @@ import com.arbon.vata.floralens.data.objectbox.PlantRecord
 import com.arbon.vata.floralens.data.objectbox.classifierLabel
 import com.arbon.vata.floralens.data.objectbox.isDiagnosisUnknown
 import com.arbon.vata.floralens.data.objectbox.isUserCorrected
+import com.arbon.vata.floralens.domain.advice.DiseaseAdvice
 import com.arbon.vata.floralens.domain.classifier.PlantLabels
 import com.arbon.vata.floralens.presentation.testdata.tomatoEarlyBlight
 import com.arbon.vata.floralens.presentation.testdata.tomatoEarlyBlightCloudVerified
@@ -158,7 +159,16 @@ fun ResultSupportedScreen(
                 } else if (record.isHealthy) {
                     Text("No disease treatment is suggested for this healthy result. Keep monitoring your plant.")
                 } else {
-                    Text("Treatment guidance is not available for this diagnosis yet. Confirm the diagnosis before choosing a treatment.")
+                    // Cloud disease names (Plant.id free text) may miss the map;
+                    // the corrected classifier label is the fallback spelling.
+                    val advice =
+                        DiseaseAdvice.forDisease(record.diseaseName)
+                            ?: originalLabel?.let(DiseaseAdvice::forClassLabel)
+                    if (advice == null) {
+                        Text("Treatment guidance is not available for this diagnosis yet. Confirm the diagnosis before choosing a treatment.")
+                    } else {
+                        advice.forEach { Text("• $it") }
+                    }
                 }
             }
         }
