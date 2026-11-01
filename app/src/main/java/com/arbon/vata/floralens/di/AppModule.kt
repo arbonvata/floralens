@@ -17,8 +17,6 @@ import com.arbon.vata.floralens.presentation.viewmodel.PlantViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.kotlinx.json.json
 import io.objectbox.Box
 import io.objectbox.BoxStore
 import kotlinx.serialization.json.Json
@@ -65,16 +63,11 @@ val appModule =
             CascadeClassifier(get())
         }
 
+        single { Json { ignoreUnknownKeys = true } }
+
         // --- Pl@ntNet second opinion ---
         single {
             HttpClient(CIO) {
-                install(ContentNegotiation) {
-                    json(
-                        Json {
-                            ignoreUnknownKeys = true
-                        },
-                    )
-                }
                 install(HttpTimeout) {
                     requestTimeoutMillis = 10_000
                 }
@@ -85,6 +78,7 @@ val appModule =
         single<SpeciesIdentifier> {
             PlantNetClient(
                 client = get(),
+                json = get(),
                 apiKey = BuildConfig.PLANTNET_API_KEY,
             )
         }
@@ -94,6 +88,7 @@ val appModule =
         single<DiseaseVerifier> {
             PlantIdClient(
                 client = get(),
+                json = get(),
                 apiKey = BuildConfig.PLANT_ID_API_KEY,
             )
         }

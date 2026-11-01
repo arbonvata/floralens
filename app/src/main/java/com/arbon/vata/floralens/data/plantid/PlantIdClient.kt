@@ -26,10 +26,7 @@ import java.io.ByteArrayOutputStream
 class PlantIdClient(
     private val client: HttpClient,
     private val apiKey: String,
-    private val json: Json =
-        Json {
-            ignoreUnknownKeys = true
-        },
+    private val json: Json,
 ) : DiseaseVerifier {
     override suspend fun assess(photo: Bitmap): DiseaseAssessment? {
         // Blank key = no PLANT_ID_API_KEY in local.properties; the disease

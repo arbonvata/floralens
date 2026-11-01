@@ -27,10 +27,7 @@ import java.io.ByteArrayOutputStream
 class PlantNetClient(
     private val client: HttpClient,
     private val apiKey: String,
-    private val json: Json =
-        Json {
-            ignoreUnknownKeys = true
-        },
+    private val json: Json,
 ) : SpeciesIdentifier {
     override suspend fun identify(photo: Bitmap): SpeciesMatch? {
         // Blank key = local.properties has no PLANTNET_API_KEY yet; scans stay
