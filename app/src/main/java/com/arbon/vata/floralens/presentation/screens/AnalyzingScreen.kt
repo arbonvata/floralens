@@ -28,15 +28,15 @@ fun AnalyzingScreen(
         Spacer(Modifier.height(16.dp))
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
-                when(step) {
+                when (step) {
                     AnalyzingStep.ON_DEVICE -> {
                         Text(stringResource(R.string.analyzing_on_device))
-                        LinearProgressIndicator( modifier = Modifier.fillMaxWidth().padding(top=8.dp))
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
                     }
                     AnalyzingStep.SECOND_OPINION -> {
                         confidence?.let { Text(stringResource(R.string.analyzing_confidence, (it * 100).toInt())) }
                         Text(stringResource(R.string.analyzing_cloud))
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(top=8.dp))
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
                     }
                 }
             }

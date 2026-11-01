@@ -87,9 +87,11 @@ fun ResultUnsupportedScreen(
 @Preview(showBackground = true, name = "Result - Unsupported Banana")
 @Composable
 fun ResultUnsupportedBananaPreview() {
+    MaterialTheme { ResultUnsupportedScreen(species = "Banana", scientificName = "Musa") }
 }
 
 @Preview(showBackground = true, name = "Result - Unsupported Avocado")
 @Composable
 fun ResultUnsupportedAvocadoPreview() {
+    MaterialTheme { ResultUnsupportedScreen(species = "Avocado", scientificName = "Persea americana") }
 }

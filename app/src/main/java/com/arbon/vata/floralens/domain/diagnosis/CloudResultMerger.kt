@@ -5,7 +5,6 @@ import com.arbon.vata.floralens.data.objectbox.UNKNOWN_DIAGNOSIS_LABEL_PREFIX
 import com.arbon.vata.floralens.data.objectbox.USER_CORRECTED_LABEL_PREFIX
 import com.arbon.vata.floralens.data.objectbox.USER_CORRECTED_UNKNOWN_LABEL_PREFIX
 import com.arbon.vata.floralens.data.objectbox.classifierLabel
-import com.arbon.vata.floralens.domain.diagnosis.DiseaseAssessment
 import com.arbon.vata.floralens.domain.species.SpeciesMatch
 
 /** Merges cloud answers while invalidating diagnoses when the identified species changes. */
