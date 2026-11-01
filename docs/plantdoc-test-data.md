@@ -1,0 +1,44 @@
+# PlantDoc database samples
+
+Five unchanged PlantDoc test images are bundled in debug builds only, under
+`app/src/debug/assets/plantdoc`. Release builds exclude the images and tools. Source URLs pinned to a commit, dataset labels,
+author attribution and the CC BY 4.0 license accompany them.
+
+In a debug build, open the three-dot menu → Settings (debug). Tap **Import
+PlantDoc samples**, then **Open History**. Repeated imports skip existing samples.
+**Remove PlantDoc samples** deletes only these named fixture records and their
+photos. Real scans are left in place. No cloud calls or inference run during import.
+
+Alternatively, connect an emulator or development phone and run from the repository root:
+
+```bash
+./gradlew connectedDebugAndroidTest \
+  -Pandroid.testInstrumentationRunnerArguments.class=com.arbon.vata.floralens.testdata.PlantDocSeedTest \
+  -Pandroid.testInstrumentationRunnerArguments.seedPlantDoc=true
+```
+
+Open History to see the samples. Complete onboarding first if needed. The seed
+utility skips samples already present and never clears existing records. Delete
+sample entries through History when finished; rerunning the command restores them.
+The utility is skipped by normal test runs unless seedPlantDoc=true is supplied.
+
+These records use dataset labels, zero confidence, and no cloud verification.
+Their names include "PlantDoc sample". They test persistence, photos, history,
+and result display; they do not measure classification accuracy. To test inference,
+copy the JPEGs to the phone's Pictures directory and choose them in the gallery
+picker. Expected labels are in samples.json. Treat dataset labels as expectations,
+not independently confirmed diagnoses.
+
+Dataset: https://github.com/pratikkayal/PlantDoc-Dataset
+Singh et al., PlantDoc: A Dataset for Visual Plant Disease Detection (2020).
+
+## Run actual offline inference
+
+In Settings (debug), tap **Run on-device AI on samples**. Importing records first
+is optional. Each of the five bundled photos is decoded using the bounded photo
+decoder and passed through the app's actual PlantClassifier. The screen compares
+the highest-scoring prediction with the expected label, displays confidence to
+one decimal place, and reports errors per image and a total label match count.
+No cloud requests are made and History records retain their fixture labels and
+zero confidence. The small sample match count is a smoke check, not an accuracy
+benchmark. Leaving the screen cancels the run; decoded photos are recycled.

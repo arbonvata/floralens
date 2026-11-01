@@ -39,6 +39,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.arbon.vata.floralens.BuildConfig
+import com.arbon.vata.floralens.debug.DebugSettingsScreen
 import com.arbon.vata.floralens.data.photos.ScanPhotoStore
 import com.arbon.vata.floralens.presentation.screens.AnalyzingScreen
 import com.arbon.vata.floralens.presentation.screens.AnalyzingStep
@@ -308,6 +310,18 @@ fun PlantDoctorNavGraph(
                 )
             }
 
+            if (BuildConfig.DEBUG) {
+                composable("debug_settings") {
+                    DebugSettingsScreen(
+                        onBack = { navController.popBackStack() },
+                        onHistory = {
+                            navController.popBackStack()
+                            navController.navigate(Screen.History.route) { launchSingleTop = true }
+                        },
+                    )
+                }
+            }
+
             composable(Screen.MyPlants.route) {
                 val tracked by vm.trackedPlants.collectAsState()
                 MyPlantsScreen(
@@ -344,9 +358,12 @@ private fun FloraLensTopBar(
                     },
                 )
                 DropdownMenuItem(
-                    text = { Text("Settings") },
-                    enabled = false,
-                    onClick = { },
+                    text = { Text(if (BuildConfig.DEBUG) "Settings (debug)" else "Settings") },
+                    enabled = BuildConfig.DEBUG,
+                    onClick = {
+                        menuExpanded = false
+                        navController.navigate("debug_settings")
+                    },
                 )
                 DropdownMenuItem(
                     text = { Text("About") },
