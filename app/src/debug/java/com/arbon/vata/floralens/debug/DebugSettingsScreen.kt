@@ -58,7 +58,7 @@ fun DebugSettingsScreen(onBack: () -> Unit, onHistory: () -> Unit) {
 
     fun evaluate() {
         busy = true
-        status = "Running on-device AI on five photos…"
+        status = "Running on-device AI on 25 photos…"
         results = emptyList()
         scope.launch {
             try {
@@ -82,7 +82,7 @@ fun DebugSettingsScreen(onBack: () -> Unit, onHistory: () -> Unit) {
         TextButton(onClick = onBack, enabled = !busy) { Text("Back") }
         Text("Debug settings", style = MaterialTheme.typography.headlineMedium)
         Text("PlantDoc samples", style = MaterialTheme.typography.titleLarge)
-        Text("Add five tomato and potato photos to History. Samples use dataset labels and 0% confidence; they are not app predictions. No cloud requests are made.")
+        Text("Add 25 tomato and potato photos to History. Samples use dataset labels and 0% confidence; they are not app predictions. No cloud requests are made.")
         Button(onClick = { runOperation(false) }, enabled = !busy) { Text("Import PlantDoc samples") }
         OutlinedButton(onClick = { runOperation(true) }, enabled = !busy) { Text("Remove PlantDoc samples") }
         Button(onClick = { evaluate() }, enabled = !busy) { Text("Run on-device AI on samples") }

@@ -27,7 +27,7 @@ class PlantDocEvaluationTest {
         }
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val results = PlantDocEvaluation.run(context, classifier)
-        assertEquals(5, results.size)
+        assertEquals(25, results.size)
         results.forEach { result ->
             assertEquals("model_prediction", result.prediction?.label)
             assertEquals(0.83f, result.prediction!!.confidence, 0f)
@@ -49,7 +49,7 @@ class PlantDocEvaluationTest {
         }
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val results = PlantDocEvaluation.run(context, classifier)
-        assertEquals(5, calls)
+        assertEquals(25, calls)
         assertEquals("Test failure", results.first().error)
         assertTrue(results.drop(1).all { it.error == "No prediction returned" })
     }
