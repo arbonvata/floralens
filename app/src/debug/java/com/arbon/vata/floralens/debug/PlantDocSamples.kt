@@ -19,13 +19,14 @@ object PlantDocSamples {
 
     suspend fun import(context: Context, repository: PlantRecordRepository): Int = withContext(Dispatchers.IO) {
         val samples = samples(context)
+        val existingNames = repository.getAll().mapTo(mutableSetOf()) { it.commonName }
         var inserted = 0
         for (index in 0 until samples.length()) {
             val sample = samples.getJSONObject(index)
             val species = sample.getString("species")
             val label = sample.getString("label")
             val name = name(species, sample.getString("file"))
-            if (repository.getAll().any { it.commonName == name }) continue
+            if (name in existingNames) continue
             val temporary = File.createTempFile("plantdoc_", ".jpg", context.cacheDir)
             try {
                 context.assets.open("plantdoc/${sample.getString("file")}").use { input ->
@@ -44,6 +45,7 @@ object PlantDocSamples {
                     ),
                 )
                 check(record.photoPath != null) { "Could not save ${sample.getString("file")}" }
+                existingNames.add(name)
                 inserted++
             } finally {
                 temporary.delete()
