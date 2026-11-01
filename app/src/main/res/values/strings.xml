@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">flora lens</string>
+    <string name="analyzing_title">Analyzing…</string>
+    <string name="analyzing_on_device">Checking the photo on your device…</string>
+    <string name="analyzing_confidence">On-device confidence: %1$d%%</string>
+    <string name="analyzing_cloud">Getting a cloud second opinion…</string>
+    <string name="analyzing_wait">Please wait while we check your photo.</string>
+    <string name="unsupported_detected">%1$s detected</string>
+    <string name="unsupported_species_confidence">Species ID: %1$s ✓ %2$d%% (Pl@ntNet)</string>
+    <string name="unsupported_species">Species ID: %1$s (Pl@ntNet)</string>
+    <string name="cloud_health_assessment">Cloud health assessment</string>
+    <string name="cloud_healthy">Plant.id found no health issue.</string>
+    <string name="cloud_possible_issue">Possible issue: %1$s</string>
+    <string name="unsupported_no_offline">No offline disease diagnosis is available for this plant.</string>
+    <string name="unsupported_request_health">Request an on-demand cloud health assessment.</string>
+    <string name="unsupported_notify">Notify me when %1$s is supported</string>
+    <string name="cloud_checking_plant_id">Checking with Plant.id…</string>
+    <string name="cloud_check_again">Check again with Plant.id</string>
+    <string name="cloud_get_opinion">Get AI second opinion</string>
+    <string name="cloud_unknown_issue">health concern detected</string>
 </resources>

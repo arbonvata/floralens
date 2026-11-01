@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
+import com.arbon.vata.floralens.R
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -22,25 +24,25 @@ fun AnalyzingScreen(
     ) {
         CircularProgressIndicator()
         Spacer(Modifier.height(24.dp))
-        Text("Analyzing...", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.analyzing_title), style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(16.dp))
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
                 when(step) {
                     AnalyzingStep.ON_DEVICE -> {
-                        Text("Checking the photo on your device…")
+                        Text(stringResource(R.string.analyzing_on_device))
                         LinearProgressIndicator( modifier = Modifier.fillMaxWidth().padding(top=8.dp))
                     }
                     AnalyzingStep.SECOND_OPINION -> {
-                        confidence?.let { Text("On-device confidence: ${(it * 100).toInt()}%") }
-                        Text("Getting a cloud second opinion…")
+                        confidence?.let { Text(stringResource(R.string.analyzing_confidence, (it * 100).toInt())) }
+                        Text(stringResource(R.string.analyzing_cloud))
                         LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(top=8.dp))
                     }
                 }
             }
         }
         Spacer(Modifier.height(16.dp))
-        Text("Please wait while we check your photo.", style = MaterialTheme.typography.labelSmall)
+        Text(stringResource(R.string.analyzing_wait), style = MaterialTheme.typography.labelSmall)
     }
 }
 

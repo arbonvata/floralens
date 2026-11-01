@@ -3,6 +3,8 @@ package com.arbon.vata.floralens.presentation.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import com.arbon.vata.floralens.R
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,12 +25,12 @@ fun ResultUnsupportedScreen(
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)) {
             Column(Modifier.padding(16.dp)) {
-                Text("$species detected", style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.unsupported_detected, species), style = MaterialTheme.typography.titleLarge)
                 Text(
                     if (confidence != null) {
-                        "Species ID: $scientificName ✓ ${(confidence * 100).toInt()}% (Pl@ntNet)"
+                        stringResource(R.string.unsupported_species_confidence, scientificName, (confidence * 100).toInt())
                     } else {
-                        "Species ID: $scientificName (Pl@ntNet)"
+                        stringResource(R.string.unsupported_species, scientificName)
                     },
                     style = MaterialTheme.typography.bodyMedium,
                 )
@@ -36,17 +38,17 @@ fun ResultUnsupportedScreen(
                 Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
                     Column(Modifier.padding(12.dp)) {
                         if (hasCloudHealthAssessment) {
-                            Text("Cloud health assessment")
+                            Text(stringResource(R.string.cloud_health_assessment))
                             Text(
                                 if (healthAssessmentHealthy == true) {
-                                    "Plant.id found no health issue."
+                                    stringResource(R.string.cloud_healthy)
                                 } else {
-                                    "Possible issue: ${healthAssessmentDisease ?: "health concern detected"}"
+                                    stringResource(R.string.cloud_possible_issue, healthAssessmentDisease ?: stringResource(R.string.cloud_unknown_issue))
                                 },
                             )
                         } else {
-                            Text("No offline disease diagnosis is available for this plant.")
-                            Text("Request an on-demand cloud health assessment.", style = MaterialTheme.typography.labelSmall)
+                            Text(stringResource(R.string.unsupported_no_offline))
+                            Text(stringResource(R.string.unsupported_request_health), style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }
@@ -55,7 +57,7 @@ fun ResultUnsupportedScreen(
         Spacer(Modifier.height(16.dp))
         Spacer(Modifier.weight(1f))
         Button(onClick = onNotifyClick, modifier = Modifier.fillMaxWidth()) {
-            Text("Notify me when $species is supported")
+            Text(stringResource(R.string.unsupported_notify, species))
         }
         Spacer(Modifier.height(8.dp))
         secondOpinionMessage?.let { message ->
@@ -74,9 +76,9 @@ fun ResultUnsupportedScreen(
             if (isSecondOpinionRunning) {
                 CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
                 Spacer(Modifier.width(8.dp))
-                Text("Checking with Plant.id…")
+                Text(stringResource(R.string.cloud_checking_plant_id))
             } else {
-                Text(if (hasCloudHealthAssessment) "Check again with Plant.id" else "Get AI second opinion")
+                Text(if (hasCloudHealthAssessment) stringResource(R.string.cloud_check_again) else stringResource(R.string.cloud_get_opinion))
             }
         }
     }
