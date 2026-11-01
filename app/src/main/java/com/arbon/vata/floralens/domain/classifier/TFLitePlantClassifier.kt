@@ -13,11 +13,12 @@ import java.nio.channels.FileChannel
 
 /**
  * On-device classifier running the PlantVillage MobileNetV2 model bundled as
- * plant_disease_model.tflite (from the MIT-licensed obeshor/Plant-Diseases-Detector
+ * plant_disease_model.tflite (from the Apache-2.0-licensed obeshor/Plant-Diseases-Detector
  * project; 38 classes, output index i = PlantLabels.CLASSES[i]).
  *
  * Preprocessing uses a centered square crop to match the square leaf framing in
- * the scan view, then feeds RGB floats in [0,1] — the model normalizes internally.
+ * the scan view, then feeds RGB floats in [0,1], matching the upstream training generator.
+ * See docs/model-audit.md for the verified input contract and benchmark results.
  */
 class TFLitePlantClassifier(
     context: Context,
