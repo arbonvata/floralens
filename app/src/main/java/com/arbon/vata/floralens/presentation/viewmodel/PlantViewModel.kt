@@ -121,6 +121,7 @@ class PlantViewModel(
             } finally {
                 if (modelInput !== photo) modelInput.recycle()
             }
+        currentCoroutineContext().ensureActive()
         val parsed = PlantLabels.parse(verdict.prediction.label)
         var record =
             plantRecordRepository.saveScan(
@@ -197,8 +198,10 @@ class PlantViewModel(
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: UnsupportedHeicPhotoException) {
+                currentCoroutineContext().ensureActive()
                 _scanState.value = ScanState.Failed("This device can’t read HEIC photos. Choose a JPG or PNG photo.")
             } catch (_: Exception) {
+                currentCoroutineContext().ensureActive()
                 _scanState.value = ScanState.Failed("Could not analyze or save this photo. Try again or choose another photo.")
             }
         }

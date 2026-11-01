@@ -535,7 +535,7 @@ class PlantViewModelTest {
         vm.scan(bitmap)
         runCurrent()
         coEvery { cascadeClassifier.diagnose(bitmap) } returns
-            CascadeClassifier.Verdict.Confident(ClassPrediction("Corn___healthy", 0.95f))
+            CascadeClassifier.Verdict.Confident(ClassPrediction("Corn___healthy", 0.95f), null)
         vm.scan(bitmap)
         runCurrent()
         response.complete(SpeciesMatch("Banana", "Musa", 0.9f, false))
@@ -553,6 +553,19 @@ class PlantViewModelTest {
         vm.requestV2Notify(ScanState.Unsupported("  "))
         advanceUntilIdle()
         coVerify(exactly = 0) { plantRecordRepository.save(any()) }
+    }
+
+    @Test
+    fun `unsupported HEIC gets an actionable failure message`() = runTest {
+        val vm = createViewModel()
+        coEvery { plantRecordRepository.decode(any<Uri>()) } throws
+            com.arbon.vata.floralens.data.photos.UnsupportedHeicPhotoException()
+        vm.scan(mockk<Uri>())
+        advanceUntilIdle()
+        val state = vm.scanState.value as ScanState.Failed
+        assertTrue(state.message.contains("HEIC"))
+        assertTrue(state.message.contains("JPG"))
+        coVerify(exactly = 0) { plantRecordRepository.saveScan(any<Bitmap>(), any()) }
     }
 
 }
