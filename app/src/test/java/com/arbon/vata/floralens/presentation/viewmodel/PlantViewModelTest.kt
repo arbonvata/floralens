@@ -522,4 +522,37 @@ class PlantViewModelTest {
         assertEquals("user_corrected:Corn___Northern_Leaf_Blight", state.record.onDeviceLabel)
         assertEquals("Corn", state.record.detectedSpecies)
     }
+    @Test
+    fun `a new scan cancels the previous cloud response`() = runTest {
+        val vm = createViewModel()
+        val response = CompletableDeferred<SpeciesMatch?>()
+        coEvery { cascadeClassifier.diagnose(bitmap) } returns
+            CascadeClassifier.Verdict.NeedsSecondOpinion(
+                ClassPrediction("Tomato___healthy", 0.55f),
+                ClassPrediction("Tomato___Late_blight", 0.44f),
+            )
+        coEvery { speciesIdentifier.identify(bitmap) } coAnswers { response.await() }
+        vm.scan(bitmap)
+        runCurrent()
+        coEvery { cascadeClassifier.diagnose(bitmap) } returns
+            CascadeClassifier.Verdict.Confident(ClassPrediction("Corn___healthy", 0.95f))
+        vm.scan(bitmap)
+        runCurrent()
+        response.complete(SpeciesMatch("Banana", "Musa", 0.9f, false))
+        advanceUntilIdle()
+        val state = vm.scanState.value as ScanState.OnDeviceResult
+        assertEquals("Corn", state.record.detectedSpecies)
+        assertFalse(state.needsCloud)
+        coVerify(exactly = 0) { plantRecordRepository.save(any()) }
+    }
+
+    @Test
+    fun `missing or blank unsupported species does not create a wishlist entry`() = runTest {
+        val vm = createViewModel()
+        vm.requestV2Notify(null)
+        vm.requestV2Notify(ScanState.Unsupported("  "))
+        advanceUntilIdle()
+        coVerify(exactly = 0) { plantRecordRepository.save(any()) }
+    }
+
 }

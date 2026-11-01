@@ -13,6 +13,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -67,6 +68,8 @@ class PlantNetClient(
                 }
             val response = json.decodeFromString<PlantNetResponse>(body.bodyAsText())
             response.toSpeciesMatch()
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (_: Exception) {
             // The second opinion is strictly optional: offline, rate-limited or a
             // changed response shape must degrade to the on-device verdict, never

@@ -12,6 +12,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -61,6 +62,8 @@ class PlantIdClient(
                     )
                 }
             json.decodeFromString<PlantIdResponse>(body.bodyAsText()).toAssessment()
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (_: Exception) {
             // Optional-by-design stage: offline, quota exhausted or an unexpected
             // payload shape must degrade to the on-device verdict, never crash.

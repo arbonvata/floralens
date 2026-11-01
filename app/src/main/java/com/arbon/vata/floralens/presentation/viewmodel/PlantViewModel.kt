@@ -18,6 +18,9 @@ import com.arbon.vata.floralens.domain.diagnosis.DiseaseVerifier
 import com.arbon.vata.floralens.domain.photos.PhotoRegion
 import com.arbon.vata.floralens.domain.species.SpeciesIdentifier
 import com.arbon.vata.floralens.domain.species.SpeciesMatch
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -64,6 +67,9 @@ class PlantViewModel(
 
     private val _scanState = MutableStateFlow<ScanState>(ScanState.Idle)
     val scanState: StateFlow<ScanState> = _scanState.asStateFlow()
+
+    private var scanJob: Job? = null
+    private var activeScanRecordId: Long? = null
 
     private var retryScan: (() -> Unit)? = null
 
@@ -130,6 +136,9 @@ class PlantViewModel(
                     ),
             )
 
+        currentCoroutineContext().ensureActive()
+        activeScanRecordId = record.id
+
         if (verdict is CascadeClassifier.Verdict.Confident) {
             _scanState.update { ScanState.OnDeviceResult(record, needsCloud = false) }
             return
@@ -138,6 +147,7 @@ class PlantViewModel(
         // Needs second opinion: show that step, then merge the cloud answers.
         _scanState.update { ScanState.OnDeviceResult(record, needsCloud = true) }
         val speciesMatch = speciesIdentifier.identify(photo)
+        currentCoroutineContext().ensureActive()
         if (record.id in deletedRecordIds) return
         if (speciesMatch != null) {
             record = plantRecordRepository.save(record.applyCloudResults(speciesMatch, null))
@@ -151,6 +161,7 @@ class PlantViewModel(
         // on-device disease verdict. Runs even when Pl@ntNet was unavailable
         // — the keys are independent and only the gate decides cost.
         val assessment = diseaseVerifier.assess(photo)
+        currentCoroutineContext().ensureActive()
         if (record.id in deletedRecordIds) return
         if (assessment != null) {
             record = plantRecordRepository.save(record.applyCloudResults(null, assessment))
@@ -172,12 +183,16 @@ class PlantViewModel(
     }
 
     private fun launchScan(retry: () -> Unit, operation: suspend () -> Unit) {
+        scanJob?.cancel()
+        deletedRecordIds.clear()
+        activeScanRecordId = null
         retryScan = retry
         // Clear the previous result before navigation can observe it.
         _scanState.value = ScanState.Scanning
-        viewModelScope.launch {
+        scanJob = viewModelScope.launch {
             try {
                 operation()
+                currentCoroutineContext().ensureActive()
                 retryScan = null
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -190,7 +205,9 @@ class PlantViewModel(
     suspend fun deleteRecord(record: PlantRecord): Boolean =
         try {
             plantRecordRepository.delete(record.id)
-            deletedRecordIds.add(record.id)
+            // Only the current scan can hold a stale snapshot. Bound tombstones
+            // to its lifetime rather than pruning them on history emissions.
+            if (record.id == activeScanRecordId) deletedRecordIds.add(record.id)
             _scanState.update { current ->
                 val activeId = when (current) {
                     is ScanState.OnDeviceResult -> current.record.id
@@ -419,6 +436,7 @@ class PlantViewModel(
 
     /** "Notify me when supported": flags the scan record, or files a standalone wishlist entry. */
     fun requestV2Notify(unsupported: ScanState.Unsupported?) {
+        if (unsupported?.species.isNullOrBlank()) return
         viewModelScope.launch {
             val record =
                 unsupported?.record?.copy(wantsNotifyV2 = true)
