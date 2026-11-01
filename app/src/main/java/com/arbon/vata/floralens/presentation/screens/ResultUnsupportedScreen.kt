@@ -17,9 +17,7 @@ fun ResultUnsupportedScreen(
     healthAssessmentDisease: String? = null,
     isSecondOpinionRunning: Boolean = false,
     secondOpinionMessage: String? = null,
-    queuePosition: Int = 128,
     onNotifyClick: () -> Unit = {},
-    onCareTipsClick: () -> Unit = {},
     onSecondOpinionClick: () -> Unit = {}
 ) {
     Column(Modifier.fillMaxSize().padding(16.dp)) {
@@ -50,27 +48,15 @@ fun ResultUnsupportedScreen(
                             Text("No offline disease diagnosis is available for this plant.")
                             Text("Request an on-demand cloud health assessment.", style = MaterialTheme.typography.labelSmall)
                         }
-                        Text("You're #$queuePosition to request $species. This helps us prioritize.", style = MaterialTheme.typography.labelSmall)
                     }
                 }
             }
         }
         Spacer(Modifier.height(16.dp))
-        Text("Still useful in v1.0:", style = MaterialTheme.typography.titleSmall)
-        Spacer(Modifier.height(8.dp))
-        Card(Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(12.dp)) {
-                Text("• Sun: Bright indirect")
-                Text("• Water: Keep moist, not wet")
-                Text("• General care from Trefle.io (free API)")
-            }
-        }
         Spacer(Modifier.weight(1f))
         Button(onClick = onNotifyClick, modifier = Modifier.fillMaxWidth()) {
             Text("Notify me when $species is supported")
         }
-        Spacer(Modifier.height(8.dp))
-        OutlinedButton(onClick = onCareTipsClick, modifier = Modifier.fillMaxWidth()) { Text("Get general care tips") }
         Spacer(Modifier.height(8.dp))
         secondOpinionMessage?.let { message ->
             Text(
@@ -99,11 +85,9 @@ fun ResultUnsupportedScreen(
 @Preview(showBackground = true, name = "Result - Unsupported Banana")
 @Composable
 fun ResultUnsupportedBananaPreview() {
-    MaterialTheme { ResultUnsupportedScreen(species = "Banana", scientificName = "Musa", queuePosition = 128) }
 }
 
 @Preview(showBackground = true, name = "Result - Unsupported Avocado")
 @Composable
 fun ResultUnsupportedAvocadoPreview() {
-    MaterialTheme { ResultUnsupportedScreen(species = "Avocado", scientificName = "Persea americana", queuePosition = 42) }
 }

@@ -37,7 +37,7 @@ fun ResultSupportedScreen(
         record.detectedSpecies.takeIf { it in PlantLabels.SUPPORTED_SPECIES }
             ?: originalLabel?.let { PlantLabels.parse(it).species }
                 ?.takeIf { it in PlantLabels.SUPPORTED_SPECIES }
-            ?: PlantLabels.SUPPORTED_SPECIES.first()
+            ?: ""
     var selectedSpecies by remember(record.id, correctionDialogOpen) { mutableStateOf(initialSpecies) }
     var selectedLabel by remember(record.id, correctionDialogOpen) {
         mutableStateOf(
@@ -190,7 +190,7 @@ fun ResultSupportedScreen(
                     Text("Choose the plant and the diagnosis that best match your photo.")
                     CorrectionDropdown(
                         label = "Plant",
-                        selected = selectedSpecies,
+                        selected = selectedSpecies.ifBlank { "Choose a plant" },
                         options = PlantLabels.SUPPORTED_SPECIES.sorted(),
                         onSelected = { species ->
                             selectedSpecies = species
@@ -208,6 +208,7 @@ fun ResultSupportedScreen(
             },
             confirmButton = {
                 TextButton(
+                    enabled = selectedSpecies.isNotBlank(),
                     onClick = {
                         onCorrectClick(selectedSpecies, selectedLabel.takeUnless { it == NOT_SURE_OPTION })
                         correctionDialogOpen = false

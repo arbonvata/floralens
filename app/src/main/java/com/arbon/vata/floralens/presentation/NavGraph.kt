@@ -9,7 +9,6 @@ import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -190,6 +189,7 @@ fun PlantDoctorNavGraph(
                         AnalyzingScreen(step = AnalyzingStep.ON_DEVICE)
                     is ScanState.OnDeviceResult ->
                         AnalyzingScreen(
+                            confidence = s.record.confidence,
                             step =
                                 if (s.needsCloud) {
                                     AnalyzingStep.SECOND_OPINION
@@ -286,7 +286,6 @@ fun PlantDoctorNavGraph(
                         vm.requestV2Notify(displayedUnsupported)
                         navController.navigate(Screen.History.route)
                     },
-                    onCareTipsClick = { /* call Trefle API */ },
                     onSecondOpinionClick = {
                         rec?.let(vm::verifyUnsupportedWithCloud)
                     },
@@ -343,9 +342,6 @@ private fun FloraLensTopBar(
     TopAppBar(
         title = { Text("Flora Lens") },
         actions = {
-            IconButton(onClick = { /* search: wired when History search lands */ }) {
-                Icon(Icons.Filled.Search, contentDescription = "Search")
-            }
             IconButton(onClick = { menuExpanded = true }) {
                 Icon(Icons.Filled.MoreVert, contentDescription = "Menu")
             }
