@@ -5,15 +5,14 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arbon.vata.floralens.data.objectbox.PlantRecord
-import com.arbon.vata.floralens.data.objectbox.UNKNOWN_DIAGNOSIS_LABEL_PREFIX
 import com.arbon.vata.floralens.data.objectbox.USER_CORRECTED_LABEL_PREFIX
 import com.arbon.vata.floralens.data.objectbox.USER_CORRECTED_UNKNOWN_LABEL_PREFIX
-import com.arbon.vata.floralens.data.objectbox.classifierLabel
 import com.arbon.vata.floralens.data.photos.UnsupportedHeicPhotoException
 import com.arbon.vata.floralens.data.repository.OnboardingRepository
 import com.arbon.vata.floralens.data.repository.PlantRecordRepository
 import com.arbon.vata.floralens.domain.classifier.CascadeClassifier
 import com.arbon.vata.floralens.domain.classifier.PlantLabels
+import com.arbon.vata.floralens.domain.diagnosis.CloudResultMerger
 import com.arbon.vata.floralens.domain.diagnosis.DiseaseAssessment
 import com.arbon.vata.floralens.domain.diagnosis.DiseaseVerifier
 import com.arbon.vata.floralens.domain.photos.PhotoRegion
@@ -151,7 +150,7 @@ class PlantViewModel(
         currentCoroutineContext().ensureActive()
         if (record.id in deletedRecordIds) return
         if (speciesMatch != null) {
-            record = plantRecordRepository.save(record.applyCloudResults(speciesMatch, null))
+            record = plantRecordRepository.save(CloudResultMerger.merge(record, speciesMatch, null))
             if (!speciesMatch.isSupported) {
                 _scanState.value = ScanState.Unsupported(speciesMatch.commonName, record)
                 return
@@ -165,7 +164,7 @@ class PlantViewModel(
         currentCoroutineContext().ensureActive()
         if (record.id in deletedRecordIds) return
         if (assessment != null) {
-            record = plantRecordRepository.save(record.applyCloudResults(null, assessment))
+            record = plantRecordRepository.save(CloudResultMerger.merge(record, null, assessment))
         }
         _scanState.update { ScanState.CloudResult(record) }
     }
@@ -212,13 +211,7 @@ class PlantViewModel(
             // to its lifetime rather than pruning them on history emissions.
             if (record.id == activeScanRecordId) deletedRecordIds.add(record.id)
             _scanState.update { current ->
-                val activeId = when (current) {
-                    is ScanState.OnDeviceResult -> current.record.id
-                    is ScanState.CloudResult -> current.record.id
-                    is ScanState.Unsupported -> current.record?.id
-                    else -> null
-                }
-                if (activeId == record.id) ScanState.Idle else current
+                if (current.activeRecord()?.id == record.id) ScanState.Idle else current
             }
             true
         } catch (cancelled: CancellationException) {
@@ -335,7 +328,7 @@ class PlantViewModel(
                     setCloudVerificationResult(record.id, "Your correction was kept. Verify again to request a new assessment.")
                     return@launch
                 }
-                val saved = plantRecordRepository.save(current.applyCloudResults(speciesMatch, diseaseAssessment))
+                val saved = plantRecordRepository.save(CloudResultMerger.merge(current, speciesMatch, diseaseAssessment))
 
                 updateActiveScan(saved)
                 setCloudVerificationResult(saved.id, verificationMessage(speciesMatch, diseaseAssessment, identifySpecies))
@@ -345,58 +338,6 @@ class PlantViewModel(
                 setCloudVerificationResult(record.id, "Cloud verification failed. Please try again.")
             }
         }
-    }
-
-    private fun PlantRecord.applyCloudResults(
-        speciesMatch: SpeciesMatch?,
-        diseaseAssessment: DiseaseAssessment?,
-    ): PlantRecord {
-        var updated = this
-        if (speciesMatch != null) {
-            // PlantNetClient maps scientific names to the same canonical crop names as PlantLabels.
-            val speciesChanged = !speciesMatch.commonName.equals(updated.detectedSpecies, ignoreCase = true)
-            if (speciesChanged) {
-                updated = updated.copy(
-                    diseaseName = null,
-                    isHealthy = false,
-                    isCloudVerified = false,
-                    hasHealthAssessment = false,
-                    onDeviceLabel = UNKNOWN_DIAGNOSIS_LABEL_PREFIX + updated.classifierLabel(),
-                    confidence = 0f,
-                )
-            }
-            updated =
-                updated.copy(
-                    detectedSpecies = speciesMatch.commonName,
-                    commonName = speciesMatch.commonName,
-                    isSupported = speciesMatch.isSupported,
-                    cloudLabel = speciesMatch.scientificName,
-                    confidence = if (speciesMatch.isSupported) updated.confidence else speciesMatch.confidence,
-                )
-        }
-        if (diseaseAssessment != null && speciesMatch?.isSupported != false) {
-            updated =
-                updated.copy(
-                    isHealthy = diseaseAssessment.isHealthy,
-                    diseaseName = if (diseaseAssessment.isHealthy) null else diseaseAssessment.diseaseName,
-                    cloudLabel =
-                        if (updated.isSupported) diseaseAssessment.diseaseName ?: "Healthy"
-                        else updated.cloudLabel,
-                    isCloudVerified = true,
-                    hasHealthAssessment = true,
-                    confidence = if (updated.isSupported) diseaseAssessment.confidence else updated.confidence,
-                    onDeviceLabel =
-                        if (updated.isSupported) {
-                            updated.onDeviceLabel
-                                .removePrefix(UNKNOWN_DIAGNOSIS_LABEL_PREFIX)
-                                .removePrefix(USER_CORRECTED_LABEL_PREFIX)
-                                .removePrefix(USER_CORRECTED_UNKNOWN_LABEL_PREFIX)
-                        } else {
-                            updated.onDeviceLabel
-                        },
-                )
-        }
-        return updated
     }
 
     private fun verificationMessage(
@@ -413,21 +354,24 @@ class PlantViewModel(
             else -> "No cloud health assessment was returned. Check your connection, API key, and credits."
         }
 
+    private fun ScanState.activeRecord(): PlantRecord? = when (this) {
+        is ScanState.OnDeviceResult -> record
+        is ScanState.CloudResult -> record
+        is ScanState.Unsupported -> record
+        else -> null
+    }
+
     private fun updateActiveScan(record: PlantRecord) {
         _scanState.update { current ->
-            when (current) {
+            if (current.activeRecord()?.id != record.id) current
+            else when (current) {
                 is ScanState.OnDeviceResult ->
-                    if (current.record.id == record.id) {
-                        if (record.isSupported) ScanState.OnDeviceResult(record, needsCloud = false)
-                        else ScanState.Unsupported(record.commonName, record)
-                    } else current
+                    if (record.isSupported) ScanState.OnDeviceResult(record, needsCloud = false)
+                    else ScanState.Unsupported(record.commonName, record)
                 is ScanState.CloudResult ->
-                    if (current.record.id == record.id) {
-                        if (record.isSupported) ScanState.CloudResult(record)
-                        else ScanState.Unsupported(record.commonName, record)
-                    } else current
-                is ScanState.Unsupported ->
-                    if (current.record?.id == record.id) ScanState.Unsupported(record.commonName, record) else current
+                    if (record.isSupported) ScanState.CloudResult(record)
+                    else ScanState.Unsupported(record.commonName, record)
+                is ScanState.Unsupported -> ScanState.Unsupported(record.commonName, record)
                 else -> current
             }
         }
