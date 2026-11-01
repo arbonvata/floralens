@@ -16,3 +16,4 @@ local.properties
 # ObjectBox build artifacts
 app/objectbox-models/default.json.bak
 app/libobjectbox-jni*.so
+/logs

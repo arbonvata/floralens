@@ -46,6 +46,9 @@ minSdk 24, targetSdk 37.
    ```
 
    Rebuild and reinstall after changing keys; they are read at build time.
+   Keys are embedded in `BuildConfig` and can be extracted from any APK, including
+   release builds. Do not distribute a build containing personal keys; use a
+   backend proxy for production credentials.
 
 3. The model ships in the repo at `app/src/main/assets/plant_disease_model.tflite`
    — no extra download needed.
@@ -123,6 +126,13 @@ Single module, feature-sliced under `app/src/main/java/com/arbon/vata/floralens/
 | `data/repository` | Persistence + photo write path |
 | `presentation` | Compose screens, nav graph, `PlantViewModel` |
 | `di` | Koin module |
+
+## Language support
+
+The v1 interface is English-only. Android string resources are used for the
+scan-progress and unsupported-result screens; other screens and domain advice
+still contain English literals. Full string extraction and translation remain
+localization work; Android lint alone does not detect every Compose text literal.
 
 ## Status
 
