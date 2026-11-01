@@ -1,4 +1,8 @@
-# On-device model audit
+# Historical MobileNetV2 model audit
+
+This report describes the previous model. The app now uses Plantulus; see
+[the migration report](plantulus-migration.md). Raw baseline measurements are
+preserved for comparison.
 
 ## Verified contract
 
@@ -65,7 +69,9 @@ Use Python 3.12 in an isolated environment:
 ```bash
 python3.12 -m venv /tmp/floralens-audit-venv
 /tmp/floralens-audit-venv/bin/pip install -r tools/model_audit/requirements.txt
+git show ff90a9d:app/src/main/assets/plant_disease_model.tflite > /tmp/legacy-model.tflite
 /tmp/floralens-audit-venv/bin/python tools/model_audit/benchmark.py \
+  --profile legacy --model /tmp/legacy-model.tflite \
   --download /tmp/floralens-plantdoc-benchmark \
   --output /tmp/model-audit-results.json
 ```
@@ -74,7 +80,8 @@ Downloaded images stay outside the app. PlantDoc is by Singh et al. (2020),
 CC BY 4.0; source paths are preserved in the downloaded manifest and report.
 https://github.com/pratikkayal/PlantDoc-Dataset
 
-`generate_reference.py` creates the instrumentation reference using a synthetic
+The current `generate_reference.py` targets Plantulus. At the time of this audit,
+it created the instrumentation reference using a synthetic
 224×224 RGB image with deterministic pixels. That avoids JPEG decoder and resize
 differences while testing channel order, normalization, output mapping and actual
 Android inference against desktop scores (absolute tolerance 0.0001).

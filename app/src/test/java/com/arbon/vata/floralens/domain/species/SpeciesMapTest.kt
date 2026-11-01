@@ -35,9 +35,20 @@ class SpeciesMapTest {
     }
 
     @Test
-    fun `supported flag splits the 14 crops from v2 species`() {
+    fun `supported flag splits model plant groups from v2 species`() {
         assertTrue(SpeciesMap.isSupportedCrop("Tomato"))
         assertFalse(SpeciesMap.isSupportedCrop("Banana"))
         assertFalse(SpeciesMap.isSupportedCrop("Avocado"))
+    }
+    @Test
+    fun `new indoor plant aliases map to model groups without broad genus guesses`() {
+        assertEquals("Aloe", SpeciesMap.match("Aloe vera"))
+        assertEquals("Cactus", SpeciesMap.match("Opuntia ficus-indica"))
+        assertEquals("Money Plant", SpeciesMap.match("Epipremnum aureum"))
+        assertEquals("Snake Plant", SpeciesMap.match("Dracaena trifasciata"))
+        assertEquals("Snake Plant", SpeciesMap.match("Sansevieria trifasciata"))
+        assertEquals("Spider Plant", SpeciesMap.match("Chlorophytum comosum"))
+        assertTrue(SpeciesMap.isSupportedCrop("Aloe"))
+        assertEquals(null, SpeciesMap.match("Dracaena fragrans"))
     }
 }

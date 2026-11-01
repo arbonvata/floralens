@@ -1,0 +1,8 @@
+{
+  "repository": "https://huggingface.co/KumarjitC/plantulus-doctor",
+  "revision": "ee2cb607a33fefa85ccc567988c98fc605fa36bd",
+  "file": "plantulus_doctor_fp16.tflite",
+  "sha256": "3f9b1ef6e7bcc603c6844429ae4ac28607cbfb48fd7b1f856362c824a29a3e65",
+  "declared_license": "MIT (upstream model card metadata)",
+  "mapping": "canonical-labels.json preserves legacy PlantVillage labels at corresponding new output indices"
+}

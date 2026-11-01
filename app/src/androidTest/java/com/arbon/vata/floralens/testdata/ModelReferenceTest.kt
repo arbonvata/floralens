@@ -20,15 +20,18 @@ class ModelReferenceTest {
         val reference = JSONObject(
             instrumentation.context.assets.open("model_audit/reference.json").bufferedReader().use { it.readText() },
         )
+        val canonical = org.json.JSONArray(instrumentation.targetContext.assets.open("plantulus/canonical-labels.json").bufferedReader().use { it.readText() })
+        assertEquals(PlantLabels.CLASSES, (0 until canonical.length()).map { canonical.getString(it) })
         val bytes = instrumentation.targetContext.assets.open("plant_disease_model.tflite").use { it.readBytes() }
         val hash = MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
         assertEquals("Regenerate reference when changing the model", reference.getString("model_sha256"), hash)
-        val pixels = IntArray(224 * 224) { index ->
-            val x = index % 224
-            val y = index / 224
+        val size = reference.getInt("image_size")
+        val pixels = IntArray(size * size) { index ->
+            val x = index % size
+            val y = index / size
             Color.rgb((3 * x + y) % 256, (5 * y + x) % 256, (7 * x + 11 * y) % 256)
         }
-        val bitmap = Bitmap.createBitmap(pixels, 224, 224, Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap.createBitmap(pixels, size, size, Bitmap.Config.ARGB_8888)
         val classifier = TFLitePlantClassifier(instrumentation.targetContext)
         suspend fun compare(bitmap: Bitmap, expected: org.json.JSONArray) {
             val actual = classifier.classify(bitmap).associateBy { it.label }

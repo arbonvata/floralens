@@ -36,7 +36,7 @@ Singh et al., PlantDoc: A Dataset for Visual Plant Disease Detection (2020).
 
 In Settings (debug), tap **Run on-device AI on samples**. Importing records first
 is optional. Each of the five bundled photos is decoded using the bounded photo
-decoder and passed through the app's actual PlantClassifier. The screen compares
+decoder and passed through the app's actual PlantClassifier (currently Plantulus Doctor). The screen compares
 the highest-scoring prediction with the expected label, displays confidence to
 one decimal place, and reports errors per image and a total label match count.
 No cloud requests are made and History records retain their fixture labels and
