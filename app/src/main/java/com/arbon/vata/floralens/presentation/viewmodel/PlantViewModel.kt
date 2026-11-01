@@ -73,7 +73,7 @@ class PlantViewModel(
 
     private var retryScan: (() -> Unit)? = null
 
-    private val deletedRecordIds = mutableSetOf<Long>()
+    private var deletedScanRecordId: Long? = null
 
     private val diagnosisRevisions = mutableMapOf<Long, Long>()
 
@@ -149,9 +149,10 @@ class PlantViewModel(
         _scanState.update { ScanState.OnDeviceResult(record, needsCloud = true) }
         val speciesMatch = speciesIdentifier.identify(photo)
         currentCoroutineContext().ensureActive()
-        if (record.id in deletedRecordIds) return
+        if (record.id == deletedScanRecordId) return
         if (speciesMatch != null) {
             record = plantRecordRepository.save(CloudResultMerger.merge(record, speciesMatch, null))
+            currentCoroutineContext().ensureActive()
             if (!speciesMatch.isSupported) {
                 _scanState.value = ScanState.Unsupported(speciesMatch.commonName, record)
                 return
@@ -163,10 +164,11 @@ class PlantViewModel(
         // — the keys are independent and only the gate decides cost.
         val assessment = diseaseVerifier.assess(photo)
         currentCoroutineContext().ensureActive()
-        if (record.id in deletedRecordIds) return
+        if (record.id == deletedScanRecordId) return
         if (assessment != null) {
             record = plantRecordRepository.save(CloudResultMerger.merge(record, null, assessment))
         }
+        currentCoroutineContext().ensureActive()
         _scanState.update { ScanState.CloudResult(record) }
     }
 
@@ -185,7 +187,7 @@ class PlantViewModel(
 
     private fun launchScan(retry: () -> Unit, operation: suspend () -> Unit) {
         scanJob?.cancel()
-        deletedRecordIds.clear()
+        deletedScanRecordId = null
         activeScanRecordId = null
         retryScan = retry
         // Clear the previous result before navigation can observe it.
@@ -210,9 +212,9 @@ class PlantViewModel(
     suspend fun deleteRecord(record: PlantRecord): Boolean =
         try {
             plantRecordRepository.delete(record.id)
-            // Only the current scan can hold a stale snapshot. Bound tombstones
-            // to its lifetime rather than pruning them on history emissions.
-            if (record.id == activeScanRecordId) deletedRecordIds.add(record.id)
+            // Only the latest scan can hold a stale snapshot; retain at most one
+            // deletion guard, including while its cloud response is in flight.
+            if (record.id == activeScanRecordId) deletedScanRecordId = record.id
             _scanState.update { current ->
                 if (current.activeRecord()?.id == record.id) ScanState.Idle else current
             }

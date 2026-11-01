@@ -531,7 +531,10 @@ class PlantViewModelTest {
                 ClassPrediction("Tomato___healthy", 0.55f),
                 ClassPrediction("Tomato___Late_blight", 0.44f),
             )
-        coEvery { speciesIdentifier.identify(bitmap) } coAnswers { response.await() }
+        coEvery { speciesIdentifier.identify(bitmap) } coAnswers {
+            // A provider that finishes despite cancellation must not publish a stale result.
+            kotlinx.coroutines.withContext(kotlinx.coroutines.NonCancellable) { response.await() }
+        }
         vm.scan(bitmap)
         runCurrent()
         coEvery { cascadeClassifier.diagnose(bitmap) } returns
