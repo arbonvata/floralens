@@ -89,16 +89,19 @@ class PlantRecordRepositoryTest {
     }
 
     @Test
-    fun `gallery scan with unreadable uri still saves a photo-less record`() = runBlocking {
+    fun `gallery scan with unreadable uri fails without inserting a record`() = runBlocking {
         val uri = mockk<Uri>()
         every { photoStore.save(uri) } returns null
         val input = PlantRecord(id = 7, detectedSpecies = "Corn")
 
-        val saved = repository.saveScan(uri, input)
-
-        assertEquals(0L, putIds.single())
-        assertEquals(42L, saved.id)
-        assertNull(saved.photoPath)
+        var failed = false
+        try {
+            repository.saveScan(uri, input)
+        } catch (_: IllegalStateException) {
+            failed = true
+        }
+        assertTrue(failed)
+        verify(exactly = 0) { plantRecordBox.put(any<PlantRecord>()) }
     }
 
     @Test

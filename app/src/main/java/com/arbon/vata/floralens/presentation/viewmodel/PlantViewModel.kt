@@ -9,6 +9,7 @@ import com.arbon.vata.floralens.data.objectbox.UNKNOWN_DIAGNOSIS_LABEL_PREFIX
 import com.arbon.vata.floralens.data.objectbox.USER_CORRECTED_LABEL_PREFIX
 import com.arbon.vata.floralens.data.objectbox.USER_CORRECTED_UNKNOWN_LABEL_PREFIX
 import com.arbon.vata.floralens.data.objectbox.classifierLabel
+import com.arbon.vata.floralens.data.photos.UnsupportedHeicPhotoException
 import com.arbon.vata.floralens.data.repository.OnboardingRepository
 import com.arbon.vata.floralens.data.repository.PlantRecordRepository
 import com.arbon.vata.floralens.domain.classifier.CascadeClassifier
@@ -196,6 +197,8 @@ class PlantViewModel(
                 retryScan = null
             } catch (cancelled: CancellationException) {
                 throw cancelled
+            } catch (_: UnsupportedHeicPhotoException) {
+                _scanState.value = ScanState.Failed("This device can’t read HEIC photos. Choose a JPG or PNG photo.")
             } catch (_: Exception) {
                 _scanState.value = ScanState.Failed("Could not analyze or save this photo. Try again or choose another photo.")
             }

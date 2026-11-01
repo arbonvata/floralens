@@ -19,4 +19,12 @@ class PhotoDecodingTest {
             assertEquals(0, sample and (sample - 1))
         }
     }
+    @Test
+    fun `HEIF detection handles major and compatible brands without treating JPEG as HEIF`() {
+        assertTrue(PhotoDecoding.isHeif("0000ftypheic0000".toByteArray()))
+        assertTrue(PhotoDecoding.isHeif("0000ftypxxxx0000mif1".toByteArray()))
+        assertEquals(false, PhotoDecoding.isHeif("0000ftypavif0000".toByteArray()))
+        assertEquals(false, PhotoDecoding.isHeif(byteArrayOf(0xff.toByte(), 0xd8.toByte())))
+    }
+
 }

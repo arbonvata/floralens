@@ -29,7 +29,9 @@ class PlantRecordRepository(
 
     /** Persists a new scan imported from the gallery; inserts even if [record] reuses an id. */
     suspend fun saveScan(photoUri: Uri, record: PlantRecord): PlantRecord {
-        val photoPath = withContext(Dispatchers.IO) { photoStore.save(photoUri) }
+        val photoPath = checkNotNull(withContext(Dispatchers.IO) { photoStore.save(photoUri) }) {
+            "Could not save imported photo"
+        }
         return put(record.copy(id = 0), photoPath)
     }
 
