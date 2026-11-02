@@ -1,0 +1,3194 @@
+{
+  "model_sha256": "12993cc3e05489be62470803a026c958d918f076f0ff23e3c045d6b8b52dd46e",
+  "input": [
+    1,
+    224,
+    224,
+    3
+  ],
+  "output": [
+    1,
+    38
+  ],
+  "normalization": "RGB / 255 float32",
+  "runtime": "ai-edge-litert 2.3.0 CPU; desktop timings are not phone timings",
+  "limitations": "Small non-random subset, five classes, dataset labels not independently verified. Pillow resize is not Android parity.",
+  "summary": {
+    "center_crop_bilinear": {
+      "correct": 14,
+      "total": 43,
+      "per_class": {
+        "Tomato___healthy": {
+          "correct": 0,
+          "total": 8
+        },
+        "Tomato___Early_blight": {
+          "correct": 3,
+          "total": 9
+        },
+        "Tomato___Late_blight": {
+          "correct": 9,
+          "total": 10
+        },
+        "Potato___Early_blight": {
+          "correct": 0,
+          "total": 8
+        },
+        "Potato___Late_blight": {
+          "correct": 2,
+          "total": 8
+        }
+      }
+    },
+    "full_resize_bilinear": {
+      "correct": 13,
+      "total": 43,
+      "per_class": {
+        "Tomato___healthy": {
+          "correct": 0,
+          "total": 8
+        },
+        "Tomato___Early_blight": {
+          "correct": 2,
+          "total": 9
+        },
+        "Tomato___Late_blight": {
+          "correct": 9,
+          "total": 10
+        },
+        "Potato___Early_blight": {
+          "correct": 0,
+          "total": 8
+        },
+        "Potato___Late_blight": {
+          "correct": 2,
+          "total": 8
+        }
+      }
+    },
+    "full_resize_nearest": {
+      "correct": 9,
+      "total": 43,
+      "per_class": {
+        "Tomato___healthy": {
+          "correct": 0,
+          "total": 8
+        },
+        "Tomato___Early_blight": {
+          "correct": 0,
+          "total": 9
+        },
+        "Tomato___Late_blight": {
+          "correct": 8,
+          "total": 10
+        },
+        "Potato___Early_blight": {
+          "correct": 0,
+          "total": 8
+        },
+        "Potato___Late_blight": {
+          "correct": 1,
+          "total": 8
+        }
+      }
+    }
+  },
+  "results": [
+    {
+      "file": "sample_000.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/1684.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9958646297454834,
+      "matches": false,
+      "milliseconds": 11.016173000825802,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9958646297454834
+        },
+        {
+          "label": "Tomato___Bacterial_spot",
+          "score": 0.001872904016636312
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.000882686348631978
+        }
+      ]
+    },
+    {
+      "file": "sample_000.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/1684.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9296041131019592,
+      "matches": false,
+      "milliseconds": 11.821813999631559,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9296041131019592
+        },
+        {
+          "label": "Tomato___Bacterial_spot",
+          "score": 0.05352543294429779
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.01038307510316372
+        }
+      ]
+    },
+    {
+      "file": "sample_000.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/1684.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.881050169467926,
+      "matches": false,
+      "milliseconds": 12.164591000328073,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.881050169467926
+        },
+        {
+          "label": "Tomato___Bacterial_spot",
+          "score": 0.09363826364278793
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.010376779362559319
+        }
+      ]
+    },
+    {
+      "file": "sample_001.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/2013-08-20-06.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Early_blight",
+      "confidence": 0.6169683933258057,
+      "matches": false,
+      "milliseconds": 18.879465998907108,
+      "top3": [
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.6169683933258057
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.2956579029560089
+        },
+        {
+          "label": "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+          "score": 0.0661105066537857
+        }
+      ]
+    },
+    {
+      "file": "sample_001.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/2013-08-20-06.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.8414937257766724,
+      "matches": false,
+      "milliseconds": 17.964579001272796,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.8414937257766724
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.14150676131248474
+        },
+        {
+          "label": "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+          "score": 0.013079442083835602
+        }
+      ]
+    },
+    {
+      "file": "sample_001.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/2013-08-20-06.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.8473074436187744,
+      "matches": false,
+      "milliseconds": 10.906927000178257,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.8473074436187744
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.1237902045249939
+        },
+        {
+          "label": "Strawberry___Leaf_scorch",
+          "score": 0.010570232756435871
+        }
+      ]
+    },
+    {
+      "file": "sample_002.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/90e2c0.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Corn___Common_rust_",
+      "confidence": 0.6380413770675659,
+      "matches": false,
+      "milliseconds": 10.94770400050038,
+      "top3": [
+        {
+          "label": "Corn___Common_rust_",
+          "score": 0.6380413770675659
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.07449585944414139
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.0573984831571579
+        }
+      ]
+    },
+    {
+      "file": "sample_002.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/90e2c0.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Apple___Apple_scab",
+      "confidence": 0.28666263818740845,
+      "matches": false,
+      "milliseconds": 11.084671999924467,
+      "top3": [
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.28666263818740845
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.1768368035554886
+        },
+        {
+          "label": "Grape___Black_rot",
+          "score": 0.13560451567173004
+        }
+      ]
+    },
+    {
+      "file": "sample_002.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/90e2c0.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Corn___Common_rust_",
+      "confidence": 0.33801522850990295,
+      "matches": false,
+      "milliseconds": 15.031773000373505,
+      "top3": [
+        {
+          "label": "Corn___Common_rust_",
+          "score": 0.33801522850990295
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.22476918995380402
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.11022204160690308
+        }
+      ]
+    },
+    {
+      "file": "sample_003.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/DSCN1015.JPG.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.999948263168335,
+      "matches": false,
+      "milliseconds": 18.552949999502744,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.999948263168335
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 1.9010249161510728e-05
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 1.667899778112769e-05
+        }
+      ]
+    },
+    {
+      "file": "sample_003.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/DSCN1015.JPG.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9999270439147949,
+      "matches": false,
+      "milliseconds": 18.67616299932706,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9999270439147949
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 2.8312892027315684e-05
+        },
+        {
+          "label": "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+          "score": 1.8583656128612347e-05
+        }
+      ]
+    },
+    {
+      "file": "sample_003.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/DSCN1015.JPG.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9993793964385986,
+      "matches": false,
+      "milliseconds": 18.486303999452502,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9993793964385986
+        },
+        {
+          "label": "Blueberry___healthy",
+          "score": 0.00019152238382957876
+        },
+        {
+          "label": "Grape___Black_rot",
+          "score": 0.00016268470790237188
+        }
+      ]
+    },
+    {
+      "file": "sample_004.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/IMG_1246.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Apple___Apple_scab",
+      "confidence": 0.6150462031364441,
+      "matches": false,
+      "milliseconds": 19.20233600139909,
+      "top3": [
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.6150462031364441
+        },
+        {
+          "label": "Blueberry___healthy",
+          "score": 0.18715445697307587
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.17717628180980682
+        }
+      ]
+    },
+    {
+      "file": "sample_004.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/IMG_1246.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.6279715299606323,
+      "matches": false,
+      "milliseconds": 17.129453000961803,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.6279715299606323
+        },
+        {
+          "label": "Blueberry___healthy",
+          "score": 0.1865013986825943
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.0947195440530777
+        }
+      ]
+    },
+    {
+      "file": "sample_004.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/IMG_1246.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Apple___Apple_scab",
+      "confidence": 0.8639435768127441,
+      "matches": false,
+      "milliseconds": 10.895436000282643,
+      "top3": [
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.8639435768127441
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.11873979866504669
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.009345190599560738
+        }
+      ]
+    },
+    {
+      "file": "sample_005.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/Tomato59.JPG.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.6587300300598145,
+      "matches": false,
+      "milliseconds": 18.18878299854987,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.6587300300598145
+        },
+        {
+          "label": "Strawberry___Leaf_scorch",
+          "score": 0.30779463052749634
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.017446447163820267
+        }
+      ]
+    },
+    {
+      "file": "sample_005.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/Tomato59.JPG.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.47720199823379517,
+      "matches": false,
+      "milliseconds": 12.407039001118392,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.47720199823379517
+        },
+        {
+          "label": "Strawberry___Leaf_scorch",
+          "score": 0.36950013041496277
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.09417850524187088
+        }
+      ]
+    },
+    {
+      "file": "sample_005.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/Tomato59.JPG.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.836859941482544,
+      "matches": false,
+      "milliseconds": 17.16411899906234,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.836859941482544
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.09805566072463989
+        },
+        {
+          "label": "Strawberry___Leaf_scorch",
+          "score": 0.025639433413743973
+        }
+      ]
+    },
+    {
+      "file": "sample_006.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/Tomato_leaf.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9988779425621033,
+      "matches": false,
+      "milliseconds": 18.49058199877618,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9988779425621033
+        },
+        {
+          "label": "Orange___Haunglongbing_(Citrus_greening)",
+          "score": 0.0008715686853975058
+        },
+        {
+          "label": "Pepper,_bell___healthy",
+          "score": 9.189264528686181e-05
+        }
+      ]
+    },
+    {
+      "file": "sample_006.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/Tomato_leaf.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9989746809005737,
+      "matches": false,
+      "milliseconds": 18.662365999261965,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9989746809005737
+        },
+        {
+          "label": "Orange___Haunglongbing_(Citrus_greening)",
+          "score": 0.0007448452524840832
+        },
+        {
+          "label": "Pepper,_bell___healthy",
+          "score": 0.00010366908099967986
+        }
+      ]
+    },
+    {
+      "file": "sample_006.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/Tomato_leaf.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9161187410354614,
+      "matches": false,
+      "milliseconds": 20.182636000754428,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9161187410354614
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.07817225903272629
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.0027730476576834917
+        }
+      ]
+    },
+    {
+      "file": "sample_007.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/main-qimg-d9c2a93f60568485c989670d9bbf703b.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Early_blight",
+      "confidence": 0.5175994634628296,
+      "matches": false,
+      "milliseconds": 19.0173760001926,
+      "top3": [
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.5175994634628296
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.21793322265148163
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.13517126441001892
+        }
+      ]
+    },
+    {
+      "file": "sample_007.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/main-qimg-d9c2a93f60568485c989670d9bbf703b.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.3300754129886627,
+      "matches": false,
+      "milliseconds": 18.441590000293218,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.3300754129886627
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.2484382539987564
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.23837459087371826
+        }
+      ]
+    },
+    {
+      "file": "sample_007.jpg",
+      "label": "Tomato___healthy",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/main-qimg-d9c2a93f60568485c989670d9bbf703b.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Leaf_Mold",
+      "confidence": 0.4734655022621155,
+      "matches": false,
+      "milliseconds": 18.426130000079866,
+      "top3": [
+        {
+          "label": "Tomato___Leaf_Mold",
+          "score": 0.4734655022621155
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.20873010158538818
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.13720674812793732
+        }
+      ]
+    },
+    {
+      "file": "sample_008.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/039b47d574bc4bb8a14259a1cd96a741.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Strawberry___Leaf_scorch",
+      "confidence": 0.45272296667099,
+      "matches": false,
+      "milliseconds": 18.475583998224465,
+      "top3": [
+        {
+          "label": "Strawberry___Leaf_scorch",
+          "score": 0.45272296667099
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.2620174288749695
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.20227017998695374
+        }
+      ]
+    },
+    {
+      "file": "sample_008.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/039b47d574bc4bb8a14259a1cd96a741.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Strawberry___Leaf_scorch",
+      "confidence": 0.7218996286392212,
+      "matches": false,
+      "milliseconds": 18.720705998930498,
+      "top3": [
+        {
+          "label": "Strawberry___Leaf_scorch",
+          "score": 0.7218996286392212
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.12696518003940582
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.10097309201955795
+        }
+      ]
+    },
+    {
+      "file": "sample_008.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/039b47d574bc4bb8a14259a1cd96a741.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Strawberry___Leaf_scorch",
+      "confidence": 0.42074304819107056,
+      "matches": false,
+      "milliseconds": 18.629083999258,
+      "top3": [
+        {
+          "label": "Strawberry___Leaf_scorch",
+          "score": 0.42074304819107056
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.3028971552848816
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.13058291375637054
+        }
+      ]
+    },
+    {
+      "file": "sample_009.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/100983448.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Early_blight",
+      "confidence": 0.5408328771591187,
+      "matches": true,
+      "milliseconds": 18.585219999295077,
+      "top3": [
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.5408328771591187
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.4515303671360016
+        },
+        {
+          "label": "Strawberry___Leaf_scorch",
+          "score": 0.0021109527442604303
+        }
+      ]
+    },
+    {
+      "file": "sample_009.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/100983448.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Early_blight",
+      "confidence": 0.5408328771591187,
+      "matches": true,
+      "milliseconds": 18.798933999278233,
+      "top3": [
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.5408328771591187
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.4515303671360016
+        },
+        {
+          "label": "Strawberry___Leaf_scorch",
+          "score": 0.0021109527442604303
+        }
+      ]
+    },
+    {
+      "file": "sample_009.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/100983448.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.8324972987174988,
+      "matches": false,
+      "milliseconds": 18.620467000801,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.8324972987174988
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.16225357353687286
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.0017293895361945033
+        }
+      ]
+    },
+    {
+      "file": "sample_010.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/1234080-Early-Blight.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9999686479568481,
+      "matches": false,
+      "milliseconds": 13.961834001747775,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9999686479568481
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 3.0192877602530643e-05
+        },
+        {
+          "label": "Tomato___Bacterial_spot",
+          "score": 4.2128533550567226e-07
+        }
+      ]
+    },
+    {
+      "file": "sample_010.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/1234080-Early-Blight.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9999686479568481,
+      "matches": false,
+      "milliseconds": 13.812872999551473,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9999686479568481
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 3.0192877602530643e-05
+        },
+        {
+          "label": "Tomato___Bacterial_spot",
+          "score": 4.2128533550567226e-07
+        }
+      ]
+    },
+    {
+      "file": "sample_010.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/1234080-Early-Blight.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9997032284736633,
+      "matches": false,
+      "milliseconds": 18.45348099959665,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9997032284736633
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.0002410174929536879
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 2.9223490855656564e-05
+        }
+      ]
+    },
+    {
+      "file": "sample_011.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/Shoemaker_7068.JPG.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9536674618721008,
+      "matches": false,
+      "milliseconds": 17.050272999767913,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9536674618721008
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.04413260519504547
+        },
+        {
+          "label": "Pepper,_bell___healthy",
+          "score": 0.0008838467765599489
+        }
+      ]
+    },
+    {
+      "file": "sample_011.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/Shoemaker_7068.JPG.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.8067145943641663,
+      "matches": false,
+      "milliseconds": 10.912687999734771,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.8067145943641663
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.14517877995967865
+        },
+        {
+          "label": "Tomato___Bacterial_spot",
+          "score": 0.026459962129592896
+        }
+      ]
+    },
+    {
+      "file": "sample_011.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/Shoemaker_7068.JPG.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Pepper,_bell___Bacterial_spot",
+      "confidence": 0.6638811826705933,
+      "matches": false,
+      "milliseconds": 13.155951999578974,
+      "top3": [
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.6638811826705933
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.28419145941734314
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.01910986751317978
+        }
+      ]
+    },
+    {
+      "file": "sample_012.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/bugs-and-blight-061.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.6838725209236145,
+      "matches": false,
+      "milliseconds": 18.729493000137154,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.6838725209236145
+        },
+        {
+          "label": "Cherry___healthy",
+          "score": 0.2747836410999298
+        },
+        {
+          "label": "Strawberry___Leaf_scorch",
+          "score": 0.019556742161512375
+        }
+      ]
+    },
+    {
+      "file": "sample_012.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/bugs-and-blight-061.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Cherry___healthy",
+      "confidence": 0.8010316491127014,
+      "matches": false,
+      "milliseconds": 18.431340000461205,
+      "top3": [
+        {
+          "label": "Cherry___healthy",
+          "score": 0.8010316491127014
+        },
+        {
+          "label": "Strawberry___Leaf_scorch",
+          "score": 0.09522615373134613
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.08510322868824005
+        }
+      ]
+    },
+    {
+      "file": "sample_012.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/bugs-and-blight-061.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.8791084289550781,
+      "matches": false,
+      "milliseconds": 18.534635000833077,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.8791084289550781
+        },
+        {
+          "label": "Cherry___healthy",
+          "score": 0.042221810668706894
+        },
+        {
+          "label": "Strawberry___Leaf_scorch",
+          "score": 0.03781341016292572
+        }
+      ]
+    },
+    {
+      "file": "sample_013.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/dscn3175.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Pepper,_bell___Bacterial_spot",
+      "confidence": 0.8880801796913147,
+      "matches": false,
+      "milliseconds": 18.54611599992495,
+      "top3": [
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.8880801796913147
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.050773803144693375
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.04262024536728859
+        }
+      ]
+    },
+    {
+      "file": "sample_013.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/dscn3175.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Pepper,_bell___Bacterial_spot",
+      "confidence": 0.971673309803009,
+      "matches": false,
+      "milliseconds": 18.504377998397104,
+      "top3": [
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.971673309803009
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.013893702998757362
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.0077223945409059525
+        }
+      ]
+    },
+    {
+      "file": "sample_013.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/dscn3175.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Pepper,_bell___Bacterial_spot",
+      "confidence": 0.6597626209259033,
+      "matches": false,
+      "milliseconds": 18.774768001094344,
+      "top3": [
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.6597626209259033
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.1507062166929245
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.13115191459655762
+        }
+      ]
+    },
+    {
+      "file": "sample_014.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/early_blight1-150x150.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Early_blight",
+      "confidence": 0.8156909942626953,
+      "matches": true,
+      "milliseconds": 18.404259000817547,
+      "top3": [
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.8156909942626953
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.18220080435276031
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.0014038372319191694
+        }
+      ]
+    },
+    {
+      "file": "sample_014.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/early_blight1-150x150.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Early_blight",
+      "confidence": 0.8156909942626953,
+      "matches": true,
+      "milliseconds": 18.563831001301878,
+      "top3": [
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.8156909942626953
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.18220080435276031
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.0014038372319191694
+        }
+      ]
+    },
+    {
+      "file": "sample_014.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/early_blight1-150x150.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9098529815673828,
+      "matches": false,
+      "milliseconds": 18.573257999378256,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9098529815673828
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.08133219927549362
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.007025158032774925
+        }
+      ]
+    },
+    {
+      "file": "sample_015.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/earlyblight21_.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Pepper,_bell___Bacterial_spot",
+      "confidence": 0.7943617105484009,
+      "matches": false,
+      "milliseconds": 11.472544998468948,
+      "top3": [
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.7943617105484009
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.20533761382102966
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.00022498314501717687
+        }
+      ]
+    },
+    {
+      "file": "sample_015.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/earlyblight21_.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9938427209854126,
+      "matches": false,
+      "milliseconds": 12.22697900084313,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9938427209854126
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.006136829499155283
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 1.3588512047135737e-05
+        }
+      ]
+    },
+    {
+      "file": "sample_015.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/earlyblight21_.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Pepper,_bell___Bacterial_spot",
+      "confidence": 0.8032525181770325,
+      "matches": false,
+      "milliseconds": 10.798101999171195,
+      "top3": [
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.8032525181770325
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.19292645156383514
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.0026705078780651093
+        }
+      ]
+    },
+    {
+      "file": "sample_016.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/tomato_early-blight_01_zoom.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Early_blight",
+      "confidence": 0.8418219089508057,
+      "matches": true,
+      "milliseconds": 10.99116600016714,
+      "top3": [
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.8418219089508057
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.12923911213874817
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.013224652037024498
+        }
+      ]
+    },
+    {
+      "file": "sample_016.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/tomato_early-blight_01_zoom.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.6893185377120972,
+      "matches": false,
+      "milliseconds": 11.010824000550201,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.6893185377120972
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.15530580282211304
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.10000255703926086
+        }
+      ]
+    },
+    {
+      "file": "sample_016.jpg",
+      "label": "Tomato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/tomato_early-blight_01_zoom.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.7874389290809631,
+      "matches": false,
+      "milliseconds": 12.96020299923839,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.7874389290809631
+        },
+        {
+          "label": "Strawberry___Leaf_scorch",
+          "score": 0.10921365767717361
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.07265821844339371
+        }
+      ]
+    },
+    {
+      "file": "sample_017.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/110822-206-Tomato-blight.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9379928708076477,
+      "matches": true,
+      "milliseconds": 18.54468400051701,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9379928708076477
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.06058020144701004
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.0005903737619519234
+        }
+      ]
+    },
+    {
+      "file": "sample_017.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/110822-206-Tomato-blight.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.7834365963935852,
+      "matches": true,
+      "milliseconds": 18.32328599994071,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.7834365963935852
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.19156773388385773
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.015427177771925926
+        }
+      ]
+    },
+    {
+      "file": "sample_017.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/110822-206-Tomato-blight.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.5599513649940491,
+      "matches": true,
+      "milliseconds": 18.798963999870466,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.5599513649940491
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.339202344417572
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.0491555854678154
+        }
+      ]
+    },
+    {
+      "file": "sample_018.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/18c.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9995028972625732,
+      "matches": true,
+      "milliseconds": 18.75727500009816,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9995028972625732
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.0004562441899906844
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 3.162603752571158e-05
+        }
+      ]
+    },
+    {
+      "file": "sample_018.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/18c.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9993565678596497,
+      "matches": true,
+      "milliseconds": 18.271458000526763,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9993565678596497
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.00043558544712141156
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.00016419787425547838
+        }
+      ]
+    },
+    {
+      "file": "sample_018.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/18c.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9929031729698181,
+      "matches": true,
+      "milliseconds": 18.35562700034643,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9929031729698181
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.0032255875412374735
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.0028907600790262222
+        }
+      ]
+    },
+    {
+      "file": "sample_019.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/636368370164094909-late-blight-15-.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.986047625541687,
+      "matches": true,
+      "milliseconds": 18.45797100031632,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.986047625541687
+        },
+        {
+          "label": "Strawberry___Leaf_scorch",
+          "score": 0.005388298071920872
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.0023612601216882467
+        }
+      ]
+    },
+    {
+      "file": "sample_019.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/636368370164094909-late-blight-15-.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9839799404144287,
+      "matches": true,
+      "milliseconds": 18.526690000726376,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9839799404144287
+        },
+        {
+          "label": "Cherry___Powdery_mildew",
+          "score": 0.003723160596564412
+        },
+        {
+          "label": "Pepper,_bell___healthy",
+          "score": 0.002843341091647744
+        }
+      ]
+    },
+    {
+      "file": "sample_019.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/636368370164094909-late-blight-15-.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.5571248531341553,
+      "matches": true,
+      "milliseconds": 18.29990199985332,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.5571248531341553
+        },
+        {
+          "label": "Corn___Common_rust_",
+          "score": 0.3557246923446655
+        },
+        {
+          "label": "Cherry___Powdery_mildew",
+          "score": 0.039807774126529694
+        }
+      ]
+    },
+    {
+      "file": "sample_020.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/70.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.7478804588317871,
+      "matches": true,
+      "milliseconds": 18.690289000005578,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.7478804588317871
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.22191976010799408
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.011749102734029293
+        }
+      ]
+    },
+    {
+      "file": "sample_020.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/70.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.7954041361808777,
+      "matches": true,
+      "milliseconds": 18.31625299928419,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.7954041361808777
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.17832839488983154
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.01071904692798853
+        }
+      ]
+    },
+    {
+      "file": "sample_020.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/70.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.6876809000968933,
+      "matches": true,
+      "milliseconds": 18.51630999954068,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.6876809000968933
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.2117430716753006
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.03895198926329613
+        }
+      ]
+    },
+    {
+      "file": "sample_021.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/E%2529Tomato-late-blight-foliar.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.8884715437889099,
+      "matches": true,
+      "milliseconds": 18.44585700018797,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.8884715437889099
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.031487416476011276
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.02866196073591709
+        }
+      ]
+    },
+    {
+      "file": "sample_021.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/E%2529Tomato-late-blight-foliar.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.8989461064338684,
+      "matches": true,
+      "milliseconds": 18.407354998998926,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.8989461064338684
+        },
+        {
+          "label": "Cherry___Powdery_mildew",
+          "score": 0.03119555488228798
+        },
+        {
+          "label": "Tomato___Leaf_Mold",
+          "score": 0.0185198076069355
+        }
+      ]
+    },
+    {
+      "file": "sample_021.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/E%2529Tomato-late-blight-foliar.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.4085584580898285,
+      "matches": true,
+      "milliseconds": 18.596752001030836,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.4085584580898285
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.3077496886253357
+        },
+        {
+          "label": "Tomato___Target_Spot",
+          "score": 0.08651876449584961
+        }
+      ]
+    },
+    {
+      "file": "sample_022.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/IMG_5808.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9992495179176331,
+      "matches": true,
+      "milliseconds": 10.936913999103126,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9992495179176331
+        },
+        {
+          "label": "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+          "score": 0.00039696632302366197
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.0002225103380624205
+        }
+      ]
+    },
+    {
+      "file": "sample_022.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/IMG_5808.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9997267127037048,
+      "matches": true,
+      "milliseconds": 12.31249000011303,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9997267127037048
+        },
+        {
+          "label": "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+          "score": 0.00018607340462040156
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 7.685211312491447e-05
+        }
+      ]
+    },
+    {
+      "file": "sample_022.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/IMG_5808.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9697356224060059,
+      "matches": true,
+      "milliseconds": 11.16115699915099,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9697356224060059
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.028422269970178604
+        },
+        {
+          "label": "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+          "score": 0.0008823498501442373
+        }
+      ]
+    },
+    {
+      "file": "sample_023.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/LateBlt09_06.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 1.0,
+      "matches": true,
+      "milliseconds": 11.335306000546552,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 1.0
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 2.0311395232397444e-08
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 1.9727638189692698e-08
+        }
+      ]
+    },
+    {
+      "file": "sample_023.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/LateBlt09_06.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9999995231628418,
+      "matches": true,
+      "milliseconds": 11.236991000259877,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9999995231628418
+        },
+        {
+          "label": "Strawberry___Leaf_scorch",
+          "score": 3.371723948930594e-07
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 1.4405077308765613e-07
+        }
+      ]
+    },
+    {
+      "file": "sample_023.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/LateBlt09_06.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9999997615814209,
+      "matches": true,
+      "milliseconds": 11.47036099973775,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9999997615814209
+        },
+        {
+          "label": "Strawberry___Leaf_scorch",
+          "score": 2.42042148101973e-07
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 2.3220593448058935e-08
+        }
+      ]
+    },
+    {
+      "file": "sample_024.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/dsc_8148cs.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.970820426940918,
+      "matches": true,
+      "milliseconds": 11.300780999590643,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.970820426940918
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.026768140494823456
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.002208981430158019
+        }
+      ]
+    },
+    {
+      "file": "sample_024.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/dsc_8148cs.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9646928310394287,
+      "matches": true,
+      "milliseconds": 11.081046000981587,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9646928310394287
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.033154912292957306
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.0017510368488729
+        }
+      ]
+    },
+    {
+      "file": "sample_024.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/dsc_8148cs.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Potato___Late_blight",
+      "confidence": 0.9495156407356262,
+      "matches": false,
+      "milliseconds": 10.971038000207045,
+      "top3": [
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.9495156407356262
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.037890974432229996
+        },
+        {
+          "label": "Strawberry___Leaf_scorch",
+          "score": 0.008188614621758461
+        }
+      ]
+    },
+    {
+      "file": "sample_025.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/image.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Pepper,_bell___healthy",
+      "confidence": 0.5880662798881531,
+      "matches": false,
+      "milliseconds": 17.922110000654357,
+      "top3": [
+        {
+          "label": "Pepper,_bell___healthy",
+          "score": 0.5880662798881531
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.20618778467178345
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.08584701269865036
+        }
+      ]
+    },
+    {
+      "file": "sample_025.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/image.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Pepper,_bell___healthy",
+      "confidence": 0.5880662798881531,
+      "matches": false,
+      "milliseconds": 18.63864099868806,
+      "top3": [
+        {
+          "label": "Pepper,_bell___healthy",
+          "score": 0.5880662798881531
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.20618778467178345
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.08584701269865036
+        }
+      ]
+    },
+    {
+      "file": "sample_025.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/image.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Pepper,_bell___healthy",
+      "confidence": 0.6297648549079895,
+      "matches": false,
+      "milliseconds": 18.377017999227974,
+      "top3": [
+        {
+          "label": "Pepper,_bell___healthy",
+          "score": 0.6297648549079895
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.21450214087963104
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.1330053061246872
+        }
+      ]
+    },
+    {
+      "file": "sample_026.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/late_blight_tomato_leaf_spore1x1200.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9638238549232483,
+      "matches": true,
+      "milliseconds": 18.758508000246366,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9638238549232483
+        },
+        {
+          "label": "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+          "score": 0.024931959807872772
+        },
+        {
+          "label": "Tomato___Bacterial_spot",
+          "score": 0.005402538925409317
+        }
+      ]
+    },
+    {
+      "file": "sample_026.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/late_blight_tomato_leaf_spore1x1200.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9981825351715088,
+      "matches": true,
+      "milliseconds": 18.565743999715778,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9981825351715088
+        },
+        {
+          "label": "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+          "score": 0.0013597403885796666
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.0001774910488165915
+        }
+      ]
+    },
+    {
+      "file": "sample_026.jpg",
+      "label": "Tomato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/late_blight_tomato_leaf_spore1x1200.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.8897528052330017,
+      "matches": true,
+      "milliseconds": 18.493658000807045,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.8897528052330017
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.06574996560811996
+        },
+        {
+          "label": "Tomato___Bacterial_spot",
+          "score": 0.021018678322434425
+        }
+      ]
+    },
+    {
+      "file": "sample_027.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/3023.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9999970197677612,
+      "matches": false,
+      "milliseconds": 18.431741000313195,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9999970197677612
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 1.2853225825892878e-06
+        },
+        {
+          "label": "Grape___Black_rot",
+          "score": 7.611492947035003e-07
+        }
+      ]
+    },
+    {
+      "file": "sample_027.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/3023.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9999444484710693,
+      "matches": false,
+      "milliseconds": 18.492315999537823,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9999444484710693
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 2.8453656341298483e-05
+        },
+        {
+          "label": "Grape___Black_rot",
+          "score": 1.6497671822435223e-05
+        }
+      ]
+    },
+    {
+      "file": "sample_027.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/3023.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Grape___Black_rot",
+      "confidence": 0.9470582008361816,
+      "matches": false,
+      "milliseconds": 18.492375000278116,
+      "top3": [
+        {
+          "label": "Grape___Black_rot",
+          "score": 0.9470582008361816
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.0523286797106266
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.00040821454604156315
+        }
+      ]
+    },
+    {
+      "file": "sample_028.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/backus-056-potato-blight.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.8060247898101807,
+      "matches": false,
+      "milliseconds": 18.664540999452583,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.8060247898101807
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.12142687290906906
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.022692633792757988
+        }
+      ]
+    },
+    {
+      "file": "sample_028.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/backus-056-potato-blight.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9647200107574463,
+      "matches": false,
+      "milliseconds": 18.788715000482625,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9647200107574463
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.013028085231781006
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.007170995231717825
+        }
+      ]
+    },
+    {
+      "file": "sample_028.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/backus-056-potato-blight.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Corn___Common_rust_",
+      "confidence": 0.6431097388267517,
+      "matches": false,
+      "milliseconds": 18.847616000130074,
+      "top3": [
+        {
+          "label": "Corn___Common_rust_",
+          "score": 0.6431097388267517
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.15256233513355255
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.12778547406196594
+        }
+      ]
+    },
+    {
+      "file": "sample_029.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/early-blight-alternaria-alternata-leaf-spotting-on-potato-leaf-X91XJE.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Pepper,_bell___Bacterial_spot",
+      "confidence": 0.7720933556556702,
+      "matches": false,
+      "milliseconds": 18.521600000894978,
+      "top3": [
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.7720933556556702
+        },
+        {
+          "label": "Potato___Early_blight",
+          "score": 0.20632849633693695
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.01641285978257656
+        }
+      ]
+    },
+    {
+      "file": "sample_029.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/early-blight-alternaria-alternata-leaf-spotting-on-potato-leaf-X91XJE.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Pepper,_bell___Bacterial_spot",
+      "confidence": 0.7565434575080872,
+      "matches": false,
+      "milliseconds": 18.719203000728157,
+      "top3": [
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.7565434575080872
+        },
+        {
+          "label": "Potato___Early_blight",
+          "score": 0.19190126657485962
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.026560448110103607
+        }
+      ]
+    },
+    {
+      "file": "sample_029.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/early-blight-alternaria-alternata-leaf-spotting-on-potato-leaf-X91XJE.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Corn___Common_rust_",
+      "confidence": 0.9901375770568848,
+      "matches": false,
+      "milliseconds": 18.471487001079367,
+      "top3": [
+        {
+          "label": "Corn___Common_rust_",
+          "score": 0.9901375770568848
+        },
+        {
+          "label": "Potato___Early_blight",
+          "score": 0.008033869788050652
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.001344135613180697
+        }
+      ]
+    },
+    {
+      "file": "sample_030.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/early-blight-or-target-spot-alternaria-solani-lesions-on-a-tomato-AXK6AY.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 1.0,
+      "matches": false,
+      "milliseconds": 18.355537000388722,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 1.0
+        },
+        {
+          "label": "Tomato___Bacterial_spot",
+          "score": 5.31743538090268e-09
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 2.5993673880009283e-09
+        }
+      ]
+    },
+    {
+      "file": "sample_030.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/early-blight-or-target-spot-alternaria-solani-lesions-on-a-tomato-AXK6AY.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 1.0,
+      "matches": false,
+      "milliseconds": 19.09495300060371,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 1.0
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 1.29522370606594e-09
+        },
+        {
+          "label": "Tomato___Bacterial_spot",
+          "score": 3.1214772433507676e-10
+        }
+      ]
+    },
+    {
+      "file": "sample_030.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/early-blight-or-target-spot-alternaria-solani-lesions-on-a-tomato-AXK6AY.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9993951320648193,
+      "matches": false,
+      "milliseconds": 18.54842099965026,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9993951320648193
+        },
+        {
+          "label": "Squash___Powdery_mildew",
+          "score": 0.00036403851117938757
+        },
+        {
+          "label": "Corn___Common_rust_",
+          "score": 0.00022934879234526306
+        }
+      ]
+    },
+    {
+      "file": "sample_031.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/earlyblightpotato.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Potato___Late_blight",
+      "confidence": 0.7753196358680725,
+      "matches": false,
+      "milliseconds": 18.5983049996139,
+      "top3": [
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.7753196358680725
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.1781575083732605
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.018978605046868324
+        }
+      ]
+    },
+    {
+      "file": "sample_031.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/earlyblightpotato.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.6366750597953796,
+      "matches": false,
+      "milliseconds": 18.417283999951906,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.6366750597953796
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.33887192606925964
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.012154449708759785
+        }
+      ]
+    },
+    {
+      "file": "sample_031.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/earlyblightpotato.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.7511516809463501,
+      "matches": false,
+      "milliseconds": 18.44331299980695,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.7511516809463501
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.2122655212879181
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.01806729845702648
+        }
+      ]
+    },
+    {
+      "file": "sample_032.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/potato-blight-phytophthora-infestans-close-up-of-upper-surface-of-BMMRXC.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Potato___Late_blight",
+      "confidence": 0.4469543993473053,
+      "matches": false,
+      "milliseconds": 18.76759500009939,
+      "top3": [
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.4469543993473053
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.38531601428985596
+        },
+        {
+          "label": "Pepper,_bell___healthy",
+          "score": 0.09445880353450775
+        }
+      ]
+    },
+    {
+      "file": "sample_032.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/potato-blight-phytophthora-infestans-close-up-of-upper-surface-of-BMMRXC.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Potato___Late_blight",
+      "confidence": 0.665709912776947,
+      "matches": false,
+      "milliseconds": 18.666674999622046,
+      "top3": [
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.665709912776947
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.124483123421669
+        },
+        {
+          "label": "Soybean___healthy",
+          "score": 0.0729723796248436
+        }
+      ]
+    },
+    {
+      "file": "sample_032.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/potato-blight-phytophthora-infestans-close-up-of-upper-surface-of-BMMRXC.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Potato___Late_blight",
+      "confidence": 0.9386153221130371,
+      "matches": false,
+      "milliseconds": 18.50785500027996,
+      "top3": [
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.9386153221130371
+        },
+        {
+          "label": "Potato___healthy",
+          "score": 0.04537507891654968
+        },
+        {
+          "label": "Soybean___healthy",
+          "score": 0.00537694850936532
+        }
+      ]
+    },
+    {
+      "file": "sample_033.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/potato-early-blight-alternaria-alternata-lesion-on-a-potato-leaf-a1w1em.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Potato___Late_blight",
+      "confidence": 0.6521231532096863,
+      "matches": false,
+      "milliseconds": 18.542851001257077,
+      "top3": [
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.6521231532096863
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.08049996942281723
+        },
+        {
+          "label": "Potato___Early_blight",
+          "score": 0.07341211289167404
+        }
+      ]
+    },
+    {
+      "file": "sample_033.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/potato-early-blight-alternaria-alternata-lesion-on-a-potato-leaf-a1w1em.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Septoria_leaf_spot",
+      "confidence": 0.2547781765460968,
+      "matches": false,
+      "milliseconds": 18.478088000847492,
+      "top3": [
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.2547781765460968
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.2031783163547516
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.19152259826660156
+        }
+      ]
+    },
+    {
+      "file": "sample_033.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/potato-early-blight-alternaria-alternata-lesion-on-a-potato-leaf-a1w1em.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Corn___Common_rust_",
+      "confidence": 0.7663854360580444,
+      "matches": false,
+      "milliseconds": 18.50894699964556,
+      "top3": [
+        {
+          "label": "Corn___Common_rust_",
+          "score": 0.7663854360580444
+        },
+        {
+          "label": "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)",
+          "score": 0.12481344491243362
+        },
+        {
+          "label": "Potato___Early_blight",
+          "score": 0.07040509581565857
+        }
+      ]
+    },
+    {
+      "file": "sample_034.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/potatobd001.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Pepper,_bell___Bacterial_spot",
+      "confidence": 0.4725862443447113,
+      "matches": false,
+      "milliseconds": 18.455546000041068,
+      "top3": [
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.4725862443447113
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.34100261330604553
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.05872887372970581
+        }
+      ]
+    },
+    {
+      "file": "sample_034.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/potatobd001.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Pepper,_bell___Bacterial_spot",
+      "confidence": 0.39322128891944885,
+      "matches": false,
+      "milliseconds": 18.32179300072312,
+      "top3": [
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.39322128891944885
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.14567512273788452
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.14228934049606323
+        }
+      ]
+    },
+    {
+      "file": "sample_034.jpg",
+      "label": "Potato___Early_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/potatobd001.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Pepper,_bell___Bacterial_spot",
+      "confidence": 0.5405895709991455,
+      "matches": false,
+      "milliseconds": 18.46913099871017,
+      "top3": [
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.5405895709991455
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.1490131914615631
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.11128906905651093
+        }
+      ]
+    },
+    {
+      "file": "sample_035.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/1421_0.jpeg%3Fitok%3DFMtmgePj.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Potato___Late_blight",
+      "confidence": 0.9999207258224487,
+      "matches": true,
+      "milliseconds": 18.449564999173163,
+      "top3": [
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.9999207258224487
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 5.916778900427744e-05
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 1.4908259799994994e-05
+        }
+      ]
+    },
+    {
+      "file": "sample_035.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/1421_0.jpeg%3Fitok%3DFMtmgePj.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Potato___Late_blight",
+      "confidence": 0.9949617385864258,
+      "matches": true,
+      "milliseconds": 18.43158100018627,
+      "top3": [
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.9949617385864258
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.0028079282492399216
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.002196552464738488
+        }
+      ]
+    },
+    {
+      "file": "sample_035.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/1421_0.jpeg%3Fitok%3DFMtmgePj.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Potato___Late_blight",
+      "confidence": 0.9984819293022156,
+      "matches": true,
+      "milliseconds": 18.45025600050576,
+      "top3": [
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.9984819293022156
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.0013197589432820678
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.00016006721125449985
+        }
+      ]
+    },
+    {
+      "file": "sample_036.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/20090710-lateblight.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9970219731330872,
+      "matches": false,
+      "milliseconds": 18.597293999846443,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9970219731330872
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.0014599774731323123
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.0007191686891019344
+        }
+      ]
+    },
+    {
+      "file": "sample_036.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/20090710-lateblight.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9488318562507629,
+      "matches": false,
+      "milliseconds": 18.429046000164817,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9488318562507629
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.023067930713295937
+        },
+        {
+          "label": "Pepper,_bell___healthy",
+          "score": 0.009193213656544685
+        }
+      ]
+    },
+    {
+      "file": "sample_036.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/20090710-lateblight.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9463689923286438,
+      "matches": false,
+      "milliseconds": 18.516431000534794,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9463689923286438
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.03570329397916794
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.007704777643084526
+        }
+      ]
+    },
+    {
+      "file": "sample_037.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/2540_600.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Pepper,_bell___healthy",
+      "confidence": 0.4991476833820343,
+      "matches": false,
+      "milliseconds": 18.425109001327655,
+      "top3": [
+        {
+          "label": "Pepper,_bell___healthy",
+          "score": 0.4991476833820343
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.2548600733280182
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.23644019663333893
+        }
+      ]
+    },
+    {
+      "file": "sample_037.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/2540_600.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.5144807696342468,
+      "matches": false,
+      "milliseconds": 18.382276999545866,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.5144807696342468
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.26423487067222595
+        },
+        {
+          "label": "Pepper,_bell___healthy",
+          "score": 0.21897128224372864
+        }
+      ]
+    },
+    {
+      "file": "sample_037.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/2540_600.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.7200856804847717,
+      "matches": false,
+      "milliseconds": 18.463079999492038,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.7200856804847717
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.25021177530288696
+        },
+        {
+          "label": "Pepper,_bell___healthy",
+          "score": 0.02672857604920864
+        }
+      ]
+    },
+    {
+      "file": "sample_038.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/5816740026_d42ef24413_Phytophthora-Infestans.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9997970461845398,
+      "matches": false,
+      "milliseconds": 18.903301999671385,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9997970461845398
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.0001640307455090806
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 1.6954623788478784e-05
+        }
+      ]
+    },
+    {
+      "file": "sample_038.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/5816740026_d42ef24413_Phytophthora-Infestans.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9882070422172546,
+      "matches": false,
+      "milliseconds": 18.50657200157002,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9882070422172546
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.004683570470660925
+        },
+        {
+          "label": "Cherry___Powdery_mildew",
+          "score": 0.0037888907827436924
+        }
+      ]
+    },
+    {
+      "file": "sample_038.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/5816740026_d42ef24413_Phytophthora-Infestans.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.5125302076339722,
+      "matches": false,
+      "milliseconds": 18.62851199985016,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.5125302076339722
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.3831922113895416
+        },
+        {
+          "label": "Corn___Common_rust_",
+          "score": 0.03778301551938057
+        }
+      ]
+    },
+    {
+      "file": "sample_039.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/B2750109-Late_blight_on_a_potato_plant-SPL.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Apple___Apple_scab",
+      "confidence": 0.43975162506103516,
+      "matches": false,
+      "milliseconds": 18.59194399912667,
+      "top3": [
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.43975162506103516
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.4384852647781372
+        },
+        {
+          "label": "Blueberry___healthy",
+          "score": 0.08370533585548401
+        }
+      ]
+    },
+    {
+      "file": "sample_039.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/B2750109-Late_blight_on_a_potato_plant-SPL.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9364172220230103,
+      "matches": false,
+      "milliseconds": 18.59788399997342,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9364172220230103
+        },
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.04163745418190956
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.01190598588436842
+        }
+      ]
+    },
+    {
+      "file": "sample_039.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/B2750109-Late_blight_on_a_potato_plant-SPL.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Apple___Apple_scab",
+      "confidence": 0.9112709164619446,
+      "matches": false,
+      "milliseconds": 18.453652000971488,
+      "top3": [
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.9112709164619446
+        },
+        {
+          "label": "Grape___Black_rot",
+          "score": 0.06901957094669342
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.01113600842654705
+        }
+      ]
+    },
+    {
+      "file": "sample_040.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/LateBlight04.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Pepper,_bell___Bacterial_spot",
+      "confidence": 0.5319694876670837,
+      "matches": false,
+      "milliseconds": 18.42666099946655,
+      "top3": [
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.5319694876670837
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.16917100548744202
+        },
+        {
+          "label": "Potato___Early_blight",
+          "score": 0.061353109776973724
+        }
+      ]
+    },
+    {
+      "file": "sample_040.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/LateBlight04.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Pepper,_bell___Bacterial_spot",
+      "confidence": 0.6440456509590149,
+      "matches": false,
+      "milliseconds": 18.421230999592808,
+      "top3": [
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.6440456509590149
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.1901402771472931
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.04192211851477623
+        }
+      ]
+    },
+    {
+      "file": "sample_040.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/LateBlight04.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Pepper,_bell___Bacterial_spot",
+      "confidence": 0.3427223563194275,
+      "matches": false,
+      "milliseconds": 18.514105999202002,
+      "top3": [
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.3427223563194275
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.2959563136100769
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.12280544638633728
+        }
+      ]
+    },
+    {
+      "file": "sample_041.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/irish-blight-symptoms-on-potato-leaves-atmf8b.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Potato___Late_blight",
+      "confidence": 0.6904259324073792,
+      "matches": true,
+      "milliseconds": 18.41504900039581,
+      "top3": [
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.6904259324073792
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.13792556524276733
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.10277927666902542
+        }
+      ]
+    },
+    {
+      "file": "sample_041.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/irish-blight-symptoms-on-potato-leaves-atmf8b.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Potato___Late_blight",
+      "confidence": 0.4001460671424866,
+      "matches": true,
+      "milliseconds": 18.50837500023772,
+      "top3": [
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.4001460671424866
+        },
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.3000013530254364
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.09786874800920486
+        }
+      ]
+    },
+    {
+      "file": "sample_041.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/irish-blight-symptoms-on-potato-leaves-atmf8b.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Apple___Apple_scab",
+      "confidence": 0.47374609112739563,
+      "matches": false,
+      "milliseconds": 18.451937999998336,
+      "top3": [
+        {
+          "label": "Apple___Apple_scab",
+          "score": 0.47374609112739563
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.2739088237285614
+        },
+        {
+          "label": "Tomato___Septoria_leaf_spot",
+          "score": 0.11199058592319489
+        }
+      ]
+    },
+    {
+      "file": "sample_042.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/potato-late-blight.jpg",
+      "mode": "center_crop_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.8729217648506165,
+      "matches": false,
+      "milliseconds": 18.410160000712494,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.8729217648506165
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.04956154525279999
+        },
+        {
+          "label": "Pepper,_bell___Bacterial_spot",
+          "score": 0.03979124501347542
+        }
+      ]
+    },
+    {
+      "file": "sample_042.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/potato-late-blight.jpg",
+      "mode": "full_resize_bilinear",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9879810214042664,
+      "matches": false,
+      "milliseconds": 18.602443000418134,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9879810214042664
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.004555171355605125
+        },
+        {
+          "label": "Tomato___Early_blight",
+          "score": 0.0021185160148888826
+        }
+      ]
+    },
+    {
+      "file": "sample_042.jpg",
+      "label": "Potato___Late_blight",
+      "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/potato-late-blight.jpg",
+      "mode": "full_resize_nearest",
+      "predicted": "Tomato___Late_blight",
+      "confidence": 0.9411196708679199,
+      "matches": false,
+      "milliseconds": 18.35782099988137,
+      "top3": [
+        {
+          "label": "Tomato___Late_blight",
+          "score": 0.9411196708679199
+        },
+        {
+          "label": "Potato___Late_blight",
+          "score": 0.014804533682763577
+        },
+        {
+          "label": "Tomato___Bacterial_spot",
+          "score": 0.01245654746890068
+        }
+      ]
+    }
+  ]
+}

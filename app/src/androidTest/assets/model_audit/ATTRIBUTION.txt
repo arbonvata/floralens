@@ -1,0 +1,3 @@
+PlantDoc (2020), Singh et al., CC BY 4.0. https://github.com/pratikkayal/PlantDoc-Dataset
+These five test-only PNGs are centre-cropped and resized derivatives of the debug fixtures.
+Source URLs are in reference.json; full license is in src/debug/assets/plantdoc/LICENSE.txt.
