@@ -1,0 +1,32 @@
+[
+  {
+    "file": "tomato_leaf.jpg",
+    "species": "Tomato",
+    "label": "Tomato___healthy",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/1684.jpg"
+  },
+  {
+    "file": "tomato_early_blight.jpg",
+    "species": "Tomato",
+    "label": "Tomato___Early_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/1234080-Early-Blight.jpg"
+  },
+  {
+    "file": "tomato_late_blight.jpg",
+    "species": "Tomato",
+    "label": "Tomato___Late_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/110822-206-Tomato-blight.jpg"
+  },
+  {
+    "file": "potato_early_blight.jpg",
+    "species": "Potato",
+    "label": "Potato___Early_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/3023.jpg"
+  },
+  {
+    "file": "potato_late_blight.jpg",
+    "species": "Potato",
+    "label": "Potato___Late_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/20090710-lateblight.jpg"
+  }
+]

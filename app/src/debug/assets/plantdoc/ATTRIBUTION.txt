@@ -1,0 +1,5 @@
+PlantDoc: A Dataset for Visual Plant Disease Detection (2020)
+Davinder Singh, Naman Jain, Pranjali Jain, Pratik Kayal, Sudhakar Kumawat and Nipun Batra.
+https://github.com/pratikkayal/PlantDoc-Dataset
+CC BY 4.0. Images copied without modification. Original paths are in samples.json.
+Dataset labels are test expectations, not verified app predictions.
