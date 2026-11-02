@@ -103,6 +103,42 @@ class PlantViewModelTest {
     }
 
     @Test
+    fun `rerun saves a fresh local prediction without cloud calls or changing original`() = runTest {
+        val vm = createViewModel()
+        val source = PlantRecord(id = 42, photoPath = "sample.jpg", confidence = 0f)
+        every { bitmap.recycle() } returns Unit
+        coEvery { cascadeClassifier.diagnose(bitmap) } returns
+            CascadeClassifier.Verdict.NeedsSecondOpinion(
+                ClassPrediction("Tomato___healthy", 0.55f),
+                ClassPrediction("Tomato___Late_blight", 0.44f),
+            )
+
+        vm.rerunOnDevice(source)
+        advanceUntilIdle()
+
+        val state = vm.scanState.value as ScanState.OnDeviceResult
+        assertEquals(7L, state.record.id)
+        assertEquals(0.55f, state.record.confidence)
+        assertEquals("Tomato___healthy", state.record.onDeviceLabel)
+        assertFalse(state.needsCloud)
+        assertEquals(0f, source.confidence)
+        coVerify(exactly = 0) { speciesIdentifier.identify(any()) }
+        coVerify(exactly = 0) { diseaseVerifier.assess(any()) }
+        coVerify(exactly = 0) { plantRecordRepository.save(any()) }
+        verify(exactly = 1) { bitmap.recycle() }
+    }
+
+    @Test
+    fun `rerun reports unreadable saved photos without saving a prediction`() = runTest {
+        val vm = createViewModel()
+        coEvery { plantRecordRepository.decodeSavedPhoto(any()) } returns null
+        vm.rerunOnDevice(PlantRecord(id = 42, photoPath = "missing.jpg"))
+        advanceUntilIdle()
+        assertTrue(vm.scanState.value is ScanState.Failed)
+        coVerify(exactly = 0) { plantRecordRepository.saveScan(any<Bitmap>(), any()) }
+    }
+
+    @Test
     fun `delete reports success after removing the record`() = runTest {
         val vm = createViewModel()
         coEvery { plantRecordRepository.delete(5L) } returns Unit

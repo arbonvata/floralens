@@ -1,6 +1,8 @@
 package com.arbon.vata.floralens.presentation.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,6 +30,7 @@ fun ResultSupportedScreen(
     cloudVerificationMessage: String? = null,
     onVerifyWithCloudClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
+    onRunOnDeviceClick: () -> Unit = {},
     onTrackClick: () -> Unit = {},
     onCorrectClick: (String, String?) -> Unit = { _, _ -> },
 ) {
@@ -54,7 +57,7 @@ fun ResultSupportedScreen(
     }
     val diseaseOptions = listOf(NOT_SURE_OPTION) + labelsFor(selectedSpecies)
 
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
                 Text(
@@ -124,6 +127,16 @@ fun ResultSupportedScreen(
             }
         }
         Spacer(Modifier.height(16.dp))
+        if (record.photoPath != null) {
+            OutlinedButton(onClick = onRunOnDeviceClick, modifier = Modifier.fillMaxWidth()) {
+                Text("Run on-device AI again")
+            }
+            Text(
+                "Saves a new result using this photo. The original scan is kept. Works offline.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Spacer(Modifier.height(8.dp))
+        }
         if (!record.isCloudVerified) {
             OutlinedButton(
                 onClick = onVerifyWithCloudClick,

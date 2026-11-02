@@ -235,6 +235,10 @@ fun PlantDoctorNavGraph(
                         isCloudVerificationRunning = verificationForRecord?.isRunning == true,
                         cloudVerificationMessage = verificationForRecord?.message,
                         onVerifyWithCloudClick = { vm.verifyWithCloud(record) },
+                        onRunOnDeviceClick = {
+                            vm.rerunOnDevice(record)
+                            navController.navigate(Screen.Analyzing.route)
+                        },
                         onSaveClick = { navController.navigate(Screen.History.route) },
                         onTrackClick = {
                             vm.toggleTracked(record)

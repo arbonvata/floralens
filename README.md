@@ -67,7 +67,9 @@ In a debug build, open **⋮ → Settings (debug)**:
 
 - **Import PlantDoc samples** adds 25 labelled photos to History, skipping
   existing samples. Imported labels come from the dataset and have 0% confidence;
-  importing does not run AI.
+  importing does not run AI. Open a sample from History and tap **Run on-device AI
+  again** to save a new offline prediction and model score. The original sample
+  stays unchanged for comparison; this action does not call cloud services.
 - **Run on-device AI on samples** runs the real offline model and displays its
   predictions, confidence scores, and agreement with expected labels. It does not
   change the imported History records or call cloud services.

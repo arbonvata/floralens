@@ -109,7 +109,7 @@ class PlantViewModel(
         launchScan(retry = { scan(photo, focusRegion) }) { performScan(photo, focusRegion) }
     }
 
-    private suspend fun performScan(photo: Bitmap, focusRegion: PhotoRegion? = null) {
+    private suspend fun performScan(photo: Bitmap, focusRegion: PhotoRegion? = null, allowCloud: Boolean = true) {
         val region = focusRegion?.clampedTo(photo.width, photo.height)
         val modelInput =
             if (region == null) photo else Bitmap.createBitmap(
@@ -140,7 +140,7 @@ class PlantViewModel(
         currentCoroutineContext().ensureActive()
         activeScanRecordId = record.id
 
-        if (verdict is CascadeClassifier.Verdict.Confident) {
+        if (!allowCloud || verdict is CascadeClassifier.Verdict.Confident) {
             _scanState.update { ScanState.OnDeviceResult(record, needsCloud = false) }
             return
         }
@@ -178,6 +178,20 @@ class PlantViewModel(
             val bitmap = plantRecordRepository.decode(photoUri)
                 ?: throw IllegalArgumentException("Unreadable image")
             performScan(bitmap)
+        }
+    }
+
+    /** Runs only local inference, preserving the source scan and its dataset/corrected label. */
+    fun rerunOnDevice(record: PlantRecord) {
+        launchScan(retry = { rerunOnDevice(record) }) {
+            val path = record.photoPath ?: error("This scan has no saved photo")
+            val photo = plantRecordRepository.decodeSavedPhoto(path)
+                ?: error("The saved photo could not be opened")
+            try {
+                performScan(photo, allowCloud = false)
+            } finally {
+                photo.recycle()
+            }
         }
     }
 
