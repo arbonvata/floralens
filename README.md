@@ -111,6 +111,89 @@ If installation reports `INSTALL_FAILED_USER_RESTRICTED`, enable **Install via
 USB** where available and accept the phone's installation prompt. Confirm actual
 test results; this Gradle runner can report build success after installation fails.
 
+## Python model evaluation tools
+
+Python is used for offline evaluation and Android test-fixture generation; the
+Android app runs inference through LiteRT and does not require Python.
+
+Use Python 3.12 and an isolated environment from the repository root:
+
+```bash
+python3.12 -m venv /tmp/floralens-audit-venv
+/tmp/floralens-audit-venv/bin/pip install -r tools/model_audit/requirements.txt
+
+# Evaluate the bundled model on the debug gallery without changing app records.
+/tmp/floralens-audit-venv/bin/python tools/model_audit/benchmark.py \
+  --samples app/src/debug/assets/plantdoc \
+  --output /tmp/floralens-gallery-results.json
+
+# Download and evaluate the larger, five-class diagnostic subset.
+/tmp/floralens-audit-venv/bin/python tools/model_audit/benchmark.py \
+  --download /tmp/floralens-plantdoc-benchmark \
+  --output /tmp/floralens-plantdoc-results.json
+```
+
+`benchmark.py` records the model hash, preprocessing profile, top three predictions,
+inference time, per-image errors, and overall/per-class label agreement. Check the
+per-image errors as well as the summary: failed images are not counted in the
+summary totals. Desktop timings do not measure phone performance, and Pillow
+decoding/resizing does not establish Android image-pipeline parity. The debug
+gallery and downloaded subset are different sample sets; compare models on the
+same photos and preprocessing contract.
+
+`generate_reference.py` regenerates tracked instrumentation assets under
+`app/src/androidTest/assets/model_audit/`, using a synthetic RGB image and the
+first five entries in the debug sample manifest:
+
+```bash
+/tmp/floralens-audit-venv/bin/python tools/model_audit/generate_reference.py
+```
+
+Review the generated JSON and PNG changes before committing. These fixtures
+check runtime agreement on prepared pixels; they do not measure recognition
+accuracy. Keep evaluation photos separate from any data used to train models or
+choose confidence thresholds.
+
+### Updating the recognition model
+
+Treat model weights, output labels, and preprocessing as one versioned contract:
+
+1. Record the source revision, license, and SHA-256 alongside the bundled model.
+2. Verify tensor shapes/types, RGB scaling, resize/crop rules, and every output
+   index. Update canonical labels and the plant catalog together, preserving the
+   meaning of labels stored in existing scans.
+3. Run the Python comparison on the same diagnostic photos and inspect class
+   regressions and incorrect high-score predictions, not only the overall score.
+4. Regenerate reference fixtures, run unit tests, and run the model reference,
+   preprocessing, and evaluation instrumentation tests on a device. See the
+   [migration report](docs/plantulus-migration.md) for commands and recorded results.
+5. Review cascade thresholds and advice coverage for new classes. The current
+   0.80 confidence / 0.15 margin rules are not calibrated for Plantulus.
+6. Check camera and gallery flows manually, including offline use and unavailable
+   cloud services, and document the results and remaining limitations.
+
+## Proposed UI improvements
+
+These are follow-up ideas, not features already implemented:
+
+- **Clearer History:** replace implementation wording such as “saved in ObjectBox”
+  with a simple scan count; distinguish an empty history from a filter with no
+  matches; add search by plant or diagnosis.
+- **Layouts for smaller screens and larger text:** make History filters scroll
+  horizontally, allow result badges to wrap, and let long result/advice content
+  scroll while keeping actions reachable.
+- **A clearer result hierarchy:** emphasize the plant, possible condition, and
+  next step; explain model scores in plain language and distinguish on-device,
+  cloud-assessed, and user-corrected results without relying on color alone.
+- **Better photo guidance:** provide concise camera tips for lighting, focus,
+  and leaf framing, with an easy path to try another photo.
+- **More useful plant tracking:** make changes across scans easier to compare
+  with dated photos and a readable progression view.
+
+Start with History wording/empty states and adaptable result layouts, then review
+camera, result, and History screens on a device at larger font sizes. Those changes
+can improve everyday use without changing model behavior.
+
 ## Project structure
 
 Single module, feature-sliced under `app/src/main/java/com/arbon/vata/floralens/`:
