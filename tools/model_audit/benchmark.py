@@ -48,13 +48,17 @@ def main():
     parser.add_argument("--samples", type=Path, default=ROOT / "app/src/debug/assets/plantdoc")
     parser.add_argument("--download", type=Path)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--profile", choices=["plantulus", "legacy"], default="plantulus")
+    parser.add_argument("--model", type=Path)
     args = parser.parse_args()
+    if args.profile == "legacy" and args.model is None:
+        parser.error("--profile legacy requires --model pointing to the old MobileNet model")
     if args.download:
         download(args.download)
         args.samples = args.download
-    model = ROOT / "app/src/main/assets/plant_disease_model.tflite"
-    text = (ROOT / "app/src/main/java/com/arbon/vata/floralens/domain/classifier/PlantLabels.kt").read_text()
-    labels = re.findall(r'"([^"]+)"', text.split("/** Species")[0])
+    model = args.model or ROOT / "app/src/main/assets/plant_disease_model.tflite"
+    label_file = ROOT / ("app/src/main/assets/plantulus/canonical-labels.json" if args.profile == "plantulus" else "tools/model_audit/legacy-labels.json")
+    labels = json.loads(label_file.read_text())
     interpreter = Interpreter(model_path=str(model), num_threads=1)
     interpreter.allocate_tensors()
     inp, out = interpreter.get_input_details()[0], interpreter.get_output_details()[0]
@@ -71,14 +75,19 @@ def main():
                     sample_size *= 2
                 if sample_size > 1:
                     image = image.resize((image.width // sample_size, image.height // sample_size))
-                for mode in ["center_crop_bilinear", "full_resize_bilinear", "full_resize_nearest"]:
+                for mode in (["plantulus_short256_crop224"] if args.profile == "plantulus" else ["center_crop_bilinear", "full_resize_bilinear", "full_resize_nearest"]):
                     photo = image
+                    if args.profile == "plantulus":
+                        scale = 256 / min(photo.size)
+                        photo = photo.resize((int(photo.width * scale), int(photo.height * scale)), Image.Resampling.BILINEAR)
+                        x, y = (photo.width - 224) // 2, (photo.height - 224) // 2
+                        photo = photo.crop((x, y, x + 224, y + 224))
                     if mode.startswith("center_crop"):
                         side = min(photo.size)
                         x, y = (photo.width - side) // 2, (photo.height - side) // 2
                         photo = photo.crop((x, y, x + side, y + side))
                     resampling = Image.Resampling.NEAREST if mode.endswith("nearest") else Image.Resampling.BILINEAR
-                    tensor = np.asarray(photo.resize((224, 224), resampling), dtype=np.float32)[None] / np.float32(255)
+                    tensor = np.asarray(photo.resize((224, 224), resampling), dtype=np.float32)[None] / np.float32(1 if args.profile == "plantulus" else 255)
                     interpreter.set_tensor(inp["index"], tensor)
                     start = time.perf_counter()
                     interpreter.invoke()
@@ -97,7 +106,7 @@ def main():
                          "per_class": {label: {"correct": sum(r["matches"] for r in selected if r["label"] == label),
                                                "total": sum(r["label"] == label for r in selected)} for label in MAPPING.values()}}
     result = {"model_sha256": hashlib.sha256(model.read_bytes()).hexdigest(),
-              "input": [1, 224, 224, 3], "output": [1, 38], "normalization": "RGB / 255 float32",
+              "profile": args.profile, "input": [1, 224, 224, 3], "output": [1, len(labels)], "normalization": "RGB float32 0–255" if args.profile == "plantulus" else "RGB / 255 float32",
               "runtime": "ai-edge-litert 2.3.0 CPU; desktop timings are not phone timings",
               "limitations": "Small non-random subset, five classes, dataset labels not independently verified. Pillow resize is not Android parity.",
               "summary": summary, "results": rows}

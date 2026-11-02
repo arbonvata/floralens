@@ -11,6 +11,13 @@ object SpeciesMap {
     /** Exact binomials Pl@ntNet commonly returns for our crops. Checked first. */
     private val BY_FULL_NAME =
         mapOf(
+            "aloe vera" to "Aloe",
+            "aloe barbadensis" to "Aloe",
+            "opuntia ficus-indica" to "Cactus",
+            "epipremnum aureum" to "Money Plant",
+            "dracaena trifasciata" to "Snake Plant",
+            "sansevieria trifasciata" to "Snake Plant",
+            "chlorophytum comosum" to "Spider Plant",
             "solanum lycopersicum" to "Tomato",
             "solanum tuberosum" to "Potato",
             "capsicum annuum" to "Bell Pepper",

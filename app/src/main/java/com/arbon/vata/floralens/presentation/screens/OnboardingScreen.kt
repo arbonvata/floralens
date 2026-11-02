@@ -1,5 +1,6 @@
 package com.arbon.vata.floralens.presentation.screens
 
+import com.arbon.vata.floralens.domain.classifier.PlantLabels
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -31,8 +32,8 @@ fun OnboardingScreen(
         Spacer(Modifier.height(24.dp))
         Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
             Column(Modifier.padding(16.dp)) {
-                Text("v1.0 supports 14 crops", style = MaterialTheme.typography.titleSmall)
-                Text("Apple, Tomato, Potato, Grape... 38 diseases. No internet needed.", style = MaterialTheme.typography.bodySmall)
+                Text("Supports ${PlantLabels.SUPPORTED_SPECIES.size} plant groups", style = MaterialTheme.typography.titleSmall)
+                Text("${PlantLabels.CLASSES.size} condition and healthy classes. No internet needed.", style = MaterialTheme.typography.bodySmall)
                 Spacer(Modifier.height(8.dp))
                 Text("🍌 Banana, 🥑 Avocado? Species ID yes, disease check in v2.0", style = MaterialTheme.typography.labelSmall)
             }
@@ -43,7 +44,7 @@ fun OnboardingScreen(
         }
         Spacer(Modifier.height(12.dp))
         OutlinedButton(onClick = onSeePlantsClick, modifier = Modifier.fillMaxWidth()) {
-            Text("See the 14 plants")
+            Text("See supported plants")
         }
     }
 }

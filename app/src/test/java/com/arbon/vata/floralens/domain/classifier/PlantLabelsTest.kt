@@ -50,13 +50,25 @@ class PlantLabelsTest {
     }
 
     @Test
-    fun `catalog matches the PlantVillage spec`() {
-        assertEquals(38, PlantLabels.CLASSES.size)
-        assertEquals(38, PlantLabels.CLASSES.toSet().size)
+    fun `catalog matches the Plantulus output contract`() {
+        assertEquals(54, PlantLabels.CLASSES.size)
+        assertEquals(54, PlantLabels.CLASSES.toSet().size)
 
         val species = PlantLabels.CLASSES.map { PlantLabels.parse(it).species }.toSet()
-        assertEquals(14, species.size)
+        assertEquals(19, species.size)
         assertEquals(species, PlantLabels.SUPPORTED_SPECIES)
+    }
+
+    @Test
+    fun `Plantulus reordered outputs retain the correct diagnoses`() {
+        assertEquals("Cherry___healthy", PlantLabels.CLASSES[12])
+        assertEquals("Cherry___Powdery_mildew", PlantLabels.CLASSES[13])
+        assertEquals("Potato___healthy", PlantLabels.CLASSES[31])
+        assertEquals("Potato___Late_blight", PlantLabels.CLASSES[32])
+        assertEquals("Tomato___healthy", PlantLabels.CLASSES[46])
+        assertEquals("Tomato___Late_blight", PlantLabels.CLASSES[47])
+        assertEquals("Aloe", PlantLabels.parse(PlantLabels.CLASSES[0]).species)
+        assertTrue(PlantLabels.parse(PlantLabels.CLASSES[1]).isHealthy)
     }
 
     @Test

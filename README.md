@@ -6,7 +6,7 @@ app spend cloud calls on second opinions.
 
 ## The cascade
 
-1. **On-device** — a 38-class PlantVillage model (14 crop species) runs via LiteRT.
+1. **On-device** — the 54-class Plantulus Doctor model (19 plant groups) runs via LiteRT.
    A verdict is trusted outright only when confidence > 0.80 **and** the runner-up
    is > 0.15 behind; otherwise the scan is flagged for cloud help.
 2. **Species check (Pl@ntNet)** — free identification. If the plant is one of the
@@ -73,19 +73,26 @@ In a debug build, open **⋮ → Settings (debug)**:
 The tools and sample images are excluded from release builds. Sources, attribution
 and usage instructions are in [PlantDoc test data](docs/plantdoc-test-data.md).
 
-The [model audit](docs/model-audit.md) verified the bundled model, all 38 output
-labels, and RGB float32 input normalization (224×224, pixels divided by 255).
-Android inference matched desktop scores within 0.0001 for one synthetic image
-and five prepared leaf-photo references on a physical phone. This comparison
-isolates inference; it does not validate arbitrary JPEG decoding or resizing.
+The current offline model is **Plantulus Doctor (EfficientNetV2-B0, FP16 weights)**.
+It requires RGB float32 pixels in **0–255**, shorter-side resize to 256, and a
+central 224×224 crop. Its 54 outputs are mapped into stable app labels so existing
+scan records remain readable. New groups include Aloe, Cactus, Money Plant, Snake
+Plant and Spider Plant; their condition classes do not yet have reviewed treatment
+advice. Cloud scientific-name aliases cover selected representative species, not
+every species in these broad plant groups.
 
-**Accuracy remains limited:** the current centre-crop pipeline matched 14 of 43
-PlantDoc labels (32.6%) in a small five-class desktop diagnostic subset. Full-image
-resizing matched 13 of 43. Twelve incorrect predictions scored above 80%, so high
-model confidence does not guarantee a correct diagnosis. This subset is not a
-representative accuracy benchmark. Production preprocessing remains unchanged.
-See the [raw results](docs/model-audit-results.json) and audit for limitations,
-source photos, and reproducible Python benchmark commands.
+On the same small 43-photo PlantDoc subset, Plantulus matched **17/43 (39.5%)**,
+versus **14/43 (32.6%)** for the previous MobileNetV2 model. Incorrect predictions
+scoring above 80% fell from 12 to 4. These are diagnostic measurements across five
+classes, not a representative accuracy guarantee; high scores can still be wrong.
+See [replacement details and validation](docs/plantulus-migration.md), the
+[Plantulus benchmark](docs/plantulus-benchmark-results.json), and the
+[historical MobileNet audit](docs/model-audit.md).
+
+The model is from [KumarjitC/plantulus-doctor](https://huggingface.co/KumarjitC/plantulus-doctor),
+with MIT declared in its model card. Its pinned revision, SHA-256, upstream label
+list, preprocessing instructions and model card are bundled in
+`app/src/main/assets/plantulus/`.
 
 To run the Android reference comparison on a connected device:
 
@@ -94,8 +101,9 @@ To run the Android reference comparison on a connected device:
   -Pandroid.testInstrumentationRunnerArguments.class=com.arbon.vata.floralens.testdata.ModelReferenceTest
 ```
 
-The separate `PlantDocEvaluationTest` checks evaluation logic and bitmap cleanup.
-It compiles, but device execution is still pending an approved test-APK install.
+The separate `PlantDocEvaluationTest` checks evaluation logic and bitmap cleanup;
+`PlantulusPreprocessingTest` checks RGB scaling, crop placement and panorama memory use.
+Current verification status is recorded in [the migration report](docs/plantulus-migration.md).
 If installation reports `INSTALL_FAILED_USER_RESTRICTED`, enable **Install via
 USB** where available and accept the phone's installation prompt. Confirm actual
 test results; this Gradle runner can report build success after installation fails.
@@ -106,7 +114,7 @@ Single module, feature-sliced under `app/src/main/java/com/arbon/vata/floralens/
 
 | Package | Contents |
 | --- | --- |
-| `domain/classifier` | Cascade gate, model labels (38 classes) |
+| `domain/classifier` | Cascade gate, canonical model labels (54 classes) |
 | `domain/species` | Pl@ntNet species-identification contract |
 | `domain/diagnosis` | Plant.id health-assessment contract |
 | `data/plantnet`, `data/plantid` | Ktor clients and DTOs |
