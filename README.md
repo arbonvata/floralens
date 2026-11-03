@@ -62,7 +62,7 @@ minSdk 24, targetSdk 37.
 
 In a debug build, open **⋮ → Settings (debug)**:
 
-- **Import PlantDoc samples** adds five labelled photos to History, skipping
+- **Import PlantDoc samples** adds 25 labelled photos to History, skipping
   existing samples. Imported labels come from the dataset and have 0% confidence;
   importing does not run AI.
 - **Run on-device AI on samples** runs the real offline model and displays its

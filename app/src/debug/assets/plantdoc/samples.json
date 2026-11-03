@@ -28,5 +28,125 @@
     "species": "Potato",
     "label": "Potato___Late_blight",
     "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/20090710-lateblight.jpg"
+  },
+  {
+    "file": "tomato_leaf_02.jpg",
+    "species": "Tomato",
+    "label": "Tomato___healthy",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/2013-08-20-06.jpg"
+  },
+  {
+    "file": "tomato_leaf_03.jpg",
+    "species": "Tomato",
+    "label": "Tomato___healthy",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/90e2c0.jpg"
+  },
+  {
+    "file": "tomato_leaf_04.jpg",
+    "species": "Tomato",
+    "label": "Tomato___healthy",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/DSCN1015.JPG.jpg"
+  },
+  {
+    "file": "tomato_leaf_05.jpg",
+    "species": "Tomato",
+    "label": "Tomato___healthy",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf/IMG_1246.jpg"
+  },
+  {
+    "file": "tomato_early_blight_02.jpg",
+    "species": "Tomato",
+    "label": "Tomato___Early_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/039b47d574bc4bb8a14259a1cd96a741.jpg"
+  },
+  {
+    "file": "tomato_early_blight_03.jpg",
+    "species": "Tomato",
+    "label": "Tomato___Early_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/100983448.jpg"
+  },
+  {
+    "file": "tomato_early_blight_04.jpg",
+    "species": "Tomato",
+    "label": "Tomato___Early_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/Shoemaker_7068.JPG.jpg"
+  },
+  {
+    "file": "tomato_early_blight_05.jpg",
+    "species": "Tomato",
+    "label": "Tomato___Early_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20Early%20blight%20leaf/bugs-and-blight-061.jpg"
+  },
+  {
+    "file": "tomato_late_blight_02.jpg",
+    "species": "Tomato",
+    "label": "Tomato___Late_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/18c.jpg"
+  },
+  {
+    "file": "tomato_late_blight_03.jpg",
+    "species": "Tomato",
+    "label": "Tomato___Late_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/636368370164094909-late-blight-15-.jpg"
+  },
+  {
+    "file": "tomato_late_blight_04.jpg",
+    "species": "Tomato",
+    "label": "Tomato___Late_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/70.jpg"
+  },
+  {
+    "file": "tomato_late_blight_05.jpg",
+    "species": "Tomato",
+    "label": "Tomato___Late_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Tomato%20leaf%20late%20blight/E%2529Tomato-late-blight-foliar.jpg"
+  },
+  {
+    "file": "potato_early_blight_02.jpg",
+    "species": "Potato",
+    "label": "Potato___Early_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/backus-056-potato-blight.jpg"
+  },
+  {
+    "file": "potato_early_blight_03.jpg",
+    "species": "Potato",
+    "label": "Potato___Early_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/early-blight-alternaria-alternata-leaf-spotting-on-potato-leaf-X91XJE.jpg"
+  },
+  {
+    "file": "potato_early_blight_04.jpg",
+    "species": "Potato",
+    "label": "Potato___Early_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/early-blight-or-target-spot-alternaria-solani-lesions-on-a-tomato-AXK6AY.jpg"
+  },
+  {
+    "file": "potato_early_blight_05.jpg",
+    "species": "Potato",
+    "label": "Potato___Early_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20early%20blight/earlyblightpotato.jpg"
+  },
+  {
+    "file": "potato_late_blight_02.jpg",
+    "species": "Potato",
+    "label": "Potato___Late_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/1421_0.jpeg%3Fitok%3DFMtmgePj.jpg"
+  },
+  {
+    "file": "potato_late_blight_03.jpg",
+    "species": "Potato",
+    "label": "Potato___Late_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/2540_600.jpg"
+  },
+  {
+    "file": "potato_late_blight_04.jpg",
+    "species": "Potato",
+    "label": "Potato___Late_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/5816740026_d42ef24413_Phytophthora-Infestans.jpg"
+  },
+  {
+    "file": "potato_late_blight_05.jpg",
+    "species": "Potato",
+    "label": "Potato___Late_blight",
+    "source": "https://raw.githubusercontent.com/pratikkayal/PlantDoc-Dataset/5467f6012d78d1c446145d5f582da6096f852ae8/test/Potato%20leaf%20late%20blight/B2750109-Late_blight_on_a_potato_plant-SPL.jpg"
   }
 ]
