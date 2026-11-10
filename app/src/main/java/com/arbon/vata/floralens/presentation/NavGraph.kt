@@ -254,6 +254,7 @@ fun PlantDoctorNavGraph(
                 val verificationState by vm.cloudVerificationState.collectAsState()
                 val verificationForRecord = verificationState?.takeIf { it.recordId == rec?.id }
                 ResultUnsupportedScreen(
+                    record = rec,
                     species =
                         if (recordId != 0L) {
                             historyRecord?.commonName?.ifEmpty { historyRecord.detectedSpecies }.orEmpty()

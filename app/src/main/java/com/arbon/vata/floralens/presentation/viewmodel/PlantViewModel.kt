@@ -122,6 +122,8 @@ class PlantViewModel(
                         isHealthy = parsed.isHealthy,
                         confidence = verdict.prediction.confidence,
                         onDeviceLabel = verdict.prediction.label,
+                        originalModelLabel = verdict.prediction.label,
+                        originalModelConfidence = verdict.prediction.confidence,
                     ),
             )
 

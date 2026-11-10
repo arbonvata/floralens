@@ -20,13 +20,17 @@ val tomatoEarlyBlight =
         isSupported = true,
     )
 
-/** Same scan after a Pl@ntNet second opinion raised or confirmed the label. */
+/** Same scan with a different diagnosis from the cloud. */
 val tomatoEarlyBlightCloudVerified =
     tomatoEarlyBlight.copy(
         id = 2,
         isCloudVerified = true,
         hasHealthAssessment = true,
-        cloudLabel = "Alternaria solani",
+        diseaseName = "Septoria leaf spot",
+        confidence = 0.91f,
+        cloudLabel = "Septoria leaf spot",
+        originalModelLabel = "Tomato___Early_blight",
+        originalModelConfidence = 0.82f,
     )
 
 val healthyApple =

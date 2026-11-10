@@ -23,6 +23,9 @@ data class PlantRecord(
     var isTracked: Boolean = false,
     var photoPath: String? = null,
     var createdAt: Long = System.currentTimeMillis(),
+    // Preserve the original model result when the displayed verdict changes.
+    var originalModelLabel: String? = null,
+    var originalModelConfidence: Float? = null,
 )
 const val UNKNOWN_DIAGNOSIS_LABEL_PREFIX = "cloud_unknown:"
 

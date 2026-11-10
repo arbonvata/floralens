@@ -361,6 +361,8 @@ class PlantViewModelTest {
         assertTrue(record.isHealthy)
         assertFalse(record.isDiagnosisUnknown())
         assertEquals(0.6f, record.confidence)
+        assertEquals("Tomato___Late_blight", record.originalModelLabel)
+        assertEquals(0.79f, record.originalModelConfidence)
         assertTrue(record.hasHealthAssessment)
     }
 
