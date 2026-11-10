@@ -81,7 +81,7 @@ val appModule =
             }
         }
 
-        // Blank key (no local.properties entry) makes identify() a graceful no-op.
+        // A blank key disables Pl@ntNet requests.
         single<SpeciesIdentifier> {
             PlantNetClient(
                 client = get(),

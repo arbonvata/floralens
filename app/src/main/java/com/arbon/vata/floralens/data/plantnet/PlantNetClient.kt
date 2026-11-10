@@ -32,7 +32,7 @@ class PlantNetClient(
         },
 ) : SpeciesIdentifier {
     override suspend fun identify(photo: Bitmap): SpeciesMatch? {
-        // Blank key = local.properties has no PLANTNET_API_KEY yet; scans stay
+        // Blank key = Pl@ntNet is not configured; scans stay
         // fully offline rather than failing a network call on every capture.
         if (apiKey.isBlank()) return null
         return try {

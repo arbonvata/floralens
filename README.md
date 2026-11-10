@@ -35,7 +35,7 @@ minSdk 24, targetSdk 37.
 ## Setup
 
 1. Open in a current Android Studio (or build with `./gradlew`).
-2. Optional API keys in `local.properties` (gitignored). Obtain a species key from
+2. Set optional API keys in `~/.gradle/gradle.properties`. Obtain a species key from
    [Pl@ntNet](https://my.plantnet.org/) and a plant.id health-assessment key from
    [Kindwise](https://admin.kindwise.com/). Provider quotas and credits apply:
 
@@ -44,7 +44,8 @@ minSdk 24, targetSdk 37.
    PLANT_ID_API_KEY=...
    ```
 
-   Rebuild and reinstall after changing keys; they are read at build time.
+   The project’s gitignored `local.properties` also works as a fallback.
+   Rebuild and reinstall after changing keys because the app reads them at build time.
 
 3. The model ships in the repo at `app/src/main/assets/plant_disease_model.tflite`
    — no extra download needed.

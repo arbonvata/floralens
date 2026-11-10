@@ -31,7 +31,7 @@ class PlantIdClient(
         },
 ) : DiseaseVerifier {
     override suspend fun assess(photo: Bitmap): DiseaseAssessment? {
-        // Blank key = no PLANT_ID_API_KEY in local.properties; the disease
+        // Blank key = Plant.id is not configured; the disease
         // second opinion silently stays off while everything else works.
         if (apiKey.isBlank()) return null
         return try {

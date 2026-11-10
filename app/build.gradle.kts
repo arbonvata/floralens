@@ -15,8 +15,11 @@ fun localProperty(name: String): String =
         }.getProperty(name, "")
     }.getOrDefault("")
 
-val plantNetApiKey: String = localProperty("PLANTNET_API_KEY")
-val plantIdApiKey: String = localProperty("PLANT_ID_API_KEY")
+fun apiKey(name: String): String =
+    providers.gradleProperty(name).orElse(providers.provider { localProperty(name) }).get()
+
+val plantNetApiKey = apiKey("PLANTNET_API_KEY")
+val plantIdApiKey = apiKey("PLANT_ID_API_KEY")
 
 apply(plugin = "io.objectbox")
 
