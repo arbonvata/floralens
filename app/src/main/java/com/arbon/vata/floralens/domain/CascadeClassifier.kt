@@ -5,7 +5,7 @@ import android.graphics.Bitmap
 /**
  * The cascade decision from the spec: trust the on-device model only when it is
  * confident (>0.80) AND the runner-up is far behind (top1 − top2 > 0.15);
- * otherwise flag the scan for a free cloud second opinion.
+ * otherwise mark the local verdict as uncertain.
  */
 class CascadeClassifier(
     private val classifier: PlantClassifier,
@@ -20,7 +20,7 @@ class CascadeClassifier(
             override val runnerUp: ClassPrediction?,
         ) : Verdict
 
-        /** Low confidence or ambiguous: request a cloud second opinion downstream. */
+        /** Low confidence or ambiguous: offer a cloud second opinion. */
         data class NeedsSecondOpinion(
             override val prediction: ClassPrediction,
             override val runnerUp: ClassPrediction?,

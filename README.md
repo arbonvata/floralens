@@ -1,22 +1,21 @@
 # Flora Lens
 
 Android app that diagnoses plant diseases from a leaf photo. Scans are classified
-on-device by a TFLite model; only when the on-device verdict is unsure does the
-app spend cloud calls on second opinions.
+on-device by a TFLite model. The app shows the local result first and sends a
+photo to cloud services only when the user requests verification.
 
-## The cascade
+## Recognition flow
 
 1. **On-device** — the 54-class Plantulus Doctor model (19 plant groups) runs via LiteRT.
-   A verdict is trusted outright only when confidence > 0.80 **and** the runner-up
-   is > 0.15 behind; otherwise the scan is flagged for cloud help.
-2. **Species check (Pl@ntNet)** — free identification. If the plant is one of the
-   unsupported species (e.g. Banana, Avocado), the scan is rewritten as a v2.0
-   wishlist entry; the user can still request an on-demand Plant.id health check.
-3. **Disease check (Plant.id)** — a health assessment confirms or corrects the
-   on-device disease verdict. It can also be re-run manually from the result screen.
+   The app marks the result as uncertain unless confidence is above 0.80 and the
+   lead over the runner-up is greater than 0.15.
+2. **Species check (Pl@ntNet)** — if the user requests a cloud second opinion,
+   Pl@ntNet checks the species. For species outside the local model's coverage,
+   the app shows the wishlist screen with a separate optional Plant.id health check.
+3. **Disease check (Plant.id)** — for supported species, a health assessment
+   confirms or corrects the local disease verdict.
 
-Every cloud stage is optional: with no API keys or offline, scans complete fully
-on-device and the cloud steps silently no-op.
+If cloud verification is unavailable, the scan stays available in history.
 
 ## Features
 

@@ -43,7 +43,6 @@ import com.arbon.vata.floralens.BuildConfig
 import com.arbon.vata.floralens.debug.DebugSettingsScreen
 import com.arbon.vata.floralens.data.photos.ScanPhotoStore
 import com.arbon.vata.floralens.presentation.screens.AnalyzingScreen
-import com.arbon.vata.floralens.presentation.screens.AnalyzingStep
 import com.arbon.vata.floralens.presentation.screens.CameraScreen
 import com.arbon.vata.floralens.presentation.screens.HistoryScreen
 import com.arbon.vata.floralens.presentation.screens.MyPlantsScreen
@@ -160,13 +159,10 @@ fun PlantDoctorNavGraph(
             composable(Screen.Analyzing.route) {
                 val state by vm.scanState.collectAsState()
 
-                // OnDeviceResult with needsCloud is the intermediate "second
-                // opinion in flight" state, not a navigation trigger.
                 LaunchedEffect(state) {
                     val destinationRoute =
-                        when (val s = state) {
-                            is ScanState.OnDeviceResult if (!s.needsCloud) -> Screen.ResultSupported.scanRoute()
-                            is ScanState.CloudResult -> Screen.ResultSupported.scanRoute()
+                        when (state) {
+                            is ScanState.OnDeviceResult, is ScanState.CloudResult -> Screen.ResultSupported.scanRoute()
                             is ScanState.Unsupported -> Screen.ResultUnsupported.scanRoute()
                             else -> null
                         }
@@ -186,18 +182,7 @@ fun PlantDoctorNavGraph(
                             Text("Choose another photo")
                         }
                     }
-                    is ScanState.Scanning, ScanState.Idle ->
-                        AnalyzingScreen(step = AnalyzingStep.ON_DEVICE)
-                    is ScanState.OnDeviceResult ->
-                        AnalyzingScreen(
-                            step =
-                                if (s.needsCloud) {
-                                    AnalyzingStep.SECOND_OPINION
-                                } else {
-                                    AnalyzingStep.ON_DEVICE
-                                },
-                        )
-                    else -> AnalyzingScreen(step = AnalyzingStep.SECOND_OPINION)
+                    else -> AnalyzingScreen()
                 }
             }
 
@@ -231,8 +216,8 @@ fun PlantDoctorNavGraph(
                 if (record != null) {
                     ResultSupportedScreen(
                         record = record,
-                        needsCloud = recordId == 0L && state is ScanState.CloudResult,
-                        isCloudVerificationRunning = verificationForRecord?.isRunning == true,
+                        needsCloud = recordId == 0L && (state as? ScanState.OnDeviceResult)?.needsCloud == true,
+                        cloudVerificationStep = verificationForRecord?.step,
                         cloudVerificationMessage = verificationForRecord?.message,
                         onVerifyWithCloudClick = { vm.verifyWithCloud(record) },
                         onSaveClick = { navController.navigate(Screen.History.route) },
@@ -280,7 +265,7 @@ fun PlantDoctorNavGraph(
                     hasCloudHealthAssessment = rec?.hasHealthAssessment == true,
                     healthAssessmentHealthy = rec?.takeIf { it.hasHealthAssessment }?.isHealthy,
                     healthAssessmentDisease = rec?.diseaseName,
-                    isSecondOpinionRunning = verificationForRecord?.isRunning == true,
+                    cloudVerificationStep = verificationForRecord?.step,
                     secondOpinionMessage = verificationForRecord?.message,
                     onNotifyClick = {
                         vm.requestV2Notify(displayedUnsupported)

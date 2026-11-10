@@ -34,9 +34,9 @@ sealed class ScanState {
     object Scanning : ScanState()                      // TFLite is running
     data class OnDeviceResult(                         // TFLite finished
         val record: PlantRecord,
-        val needsCloud: Boolean                        // true if confidence <0.80
+        val needsCloud: Boolean                        // The local verdict is uncertain
     ) : ScanState()
-    data class CloudResult(                            // Pl@ntNet/Gemini second opinion done
+    data class CloudResult(                            // Requested cloud second opinion complete
         val record: PlantRecord
     ) : ScanState()
     data class Unsupported(                            // Banana / Avocado detected
@@ -45,11 +45,15 @@ sealed class ScanState {
     ) : ScanState()
 }
 
+enum class CloudVerificationStep { PREPARING_PHOTO, CHECKING_SPECIES, CHECKING_HEALTH }
+
 data class CloudVerificationState(
     val recordId: Long,
-    val isRunning: Boolean,
+    val step: CloudVerificationStep? = null,
     val message: String? = null,
-)
+) {
+    val isRunning: Boolean get() = step != null
+}
 
 class PlantViewModel(
     private val plantRecordRepository: PlantRecordRepository,
@@ -66,8 +70,6 @@ class PlantViewModel(
     val scanState: StateFlow<ScanState> = _scanState.asStateFlow()
 
     private var retryScan: (() -> Unit)? = null
-
-    private val deletedRecordIds = mutableSetOf<Long>()
 
     private val diagnosisRevisions = mutableMapOf<Long, Long>()
 
@@ -91,14 +93,7 @@ class PlantViewModel(
         onboardingRepository.setDone()
     }
 
-    /**
-     * Full cascade pipeline: classify on-device, persist the scan with its photo,
-     * then — when the gate is unsure — run the cloud second opinions. Pl@ntNet
-     * verifies the species or redirects Banana/Avocado/Mango to the v2.0
-     * wishlist flow; Plant.id then confirms or corrects the disease verdict.
-     * Unavailable cloud stages (offline / no key) leave the on-device result as
-     * the final, unverified verdict.
-     */
+    /** Classifies and saves the photo locally. Cloud verification starts from the result screen. */
     fun scan(photo: Bitmap, focusRegion: PhotoRegion? = null) {
         launchScan(retry = { scan(photo, focusRegion) }) { performScan(photo, focusRegion) }
     }
@@ -116,7 +111,7 @@ class PlantViewModel(
                 if (modelInput !== photo) modelInput.recycle()
             }
         val parsed = PlantLabels.parse(verdict.prediction.label)
-        var record =
+        val record =
             plantRecordRepository.saveScan(
                 photo = photo,
                 record =
@@ -130,32 +125,8 @@ class PlantViewModel(
                     ),
             )
 
-        if (verdict is CascadeClassifier.Verdict.Confident) {
-            _scanState.update { ScanState.OnDeviceResult(record, needsCloud = false) }
-            return
-        }
-
-        // Needs second opinion: show that step, then merge the cloud answers.
-        _scanState.update { ScanState.OnDeviceResult(record, needsCloud = true) }
-        val speciesMatch = speciesIdentifier.identify(photo)
-        if (record.id in deletedRecordIds) return
-        if (speciesMatch != null) {
-            record = plantRecordRepository.save(record.applyCloudResults(speciesMatch, null))
-            if (!speciesMatch.isSupported) {
-                _scanState.value = ScanState.Unsupported(speciesMatch.commonName, record)
-                return
-            }
-        }
-
-        // Disease-level second opinion (Plant.id): confirms or corrects the
-        // on-device disease verdict. Runs even when Pl@ntNet was unavailable
-        // — the keys are independent and only the gate decides cost.
-        val assessment = diseaseVerifier.assess(photo)
-        if (record.id in deletedRecordIds) return
-        if (assessment != null) {
-            record = plantRecordRepository.save(record.applyCloudResults(null, assessment))
-        }
-        _scanState.update { ScanState.CloudResult(record) }
+        _scanState.value =
+            ScanState.OnDeviceResult(record, needsCloud = verdict is CascadeClassifier.Verdict.NeedsSecondOpinion)
     }
 
     /** Gallery imports use the same error handling and retry path as camera scans. */
@@ -190,7 +161,6 @@ class PlantViewModel(
     suspend fun deleteRecord(record: PlantRecord): Boolean =
         try {
             plantRecordRepository.delete(record.id)
-            deletedRecordIds.add(record.id)
             _scanState.update { current ->
                 val activeId = when (current) {
                     is ScanState.OnDeviceResult -> current.record.id
@@ -291,7 +261,7 @@ class PlantViewModel(
         }
 
         val diagnosisRevision = diagnosisRevisions[record.id] ?: 0L
-        _cloudVerificationState.value = CloudVerificationState(record.id, isRunning = true)
+        _cloudVerificationState.value = CloudVerificationState(record.id, step = CloudVerificationStep.PREPARING_PHOTO)
         viewModelScope.launch {
             try {
                 val photo = plantRecordRepository.decodeSavedPhoto(photoPath)
@@ -300,8 +270,14 @@ class PlantViewModel(
                     return@launch
                 }
 
-                val speciesMatch = if (identifySpecies) speciesIdentifier.identify(photo) else null
-                val diseaseAssessment = diseaseVerifier.assess(photo)
+                val speciesMatch = if (identifySpecies) {
+                    updateCloudVerificationStep(record.id, CloudVerificationStep.CHECKING_SPECIES)
+                    speciesIdentifier.identify(photo)
+                } else null
+                val diseaseAssessment = if (speciesMatch?.isSupported != false) {
+                    updateCloudVerificationStep(record.id, CloudVerificationStep.CHECKING_HEALTH)
+                    diseaseVerifier.assess(photo)
+                } else null
 
                 // The cloud calls run for seconds, during which the user may edit
                 // the scan (correction, tracking). Cloud fields must merge onto
@@ -315,10 +291,11 @@ class PlantViewModel(
                     setCloudVerificationResult(record.id, "Your correction was kept. Verify again to request a new assessment.")
                     return@launch
                 }
-                val saved = plantRecordRepository.save(current.applyCloudResults(speciesMatch, diseaseAssessment))
-
-                updateActiveScan(saved)
-                setCloudVerificationResult(saved.id, verificationMessage(speciesMatch, diseaseAssessment, identifySpecies))
+                if (speciesMatch != null || diseaseAssessment != null) {
+                    val saved = plantRecordRepository.save(current.applyCloudResults(speciesMatch, diseaseAssessment))
+                    updateActiveScan(saved)
+                }
+                setCloudVerificationResult(record.id, verificationMessage(speciesMatch, diseaseAssessment, identifySpecies))
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
@@ -398,7 +375,7 @@ class PlantViewModel(
             when (current) {
                 is ScanState.OnDeviceResult ->
                     if (current.record.id == record.id) {
-                        if (record.isSupported) ScanState.OnDeviceResult(record, needsCloud = false)
+                        if (record.isSupported) ScanState.CloudResult(record)
                         else ScanState.Unsupported(record.commonName, record)
                     } else current
                 is ScanState.CloudResult ->
@@ -413,8 +390,14 @@ class PlantViewModel(
         }
     }
 
+    private fun updateCloudVerificationStep(recordId: Long, step: CloudVerificationStep) {
+        _cloudVerificationState.update { current ->
+            if (current?.recordId == recordId) current.copy(step = step) else current
+        }
+    }
+
     private fun setCloudVerificationResult(recordId: Long, message: String) {
-        _cloudVerificationState.value = CloudVerificationState(recordId, isRunning = false, message = message)
+        _cloudVerificationState.value = CloudVerificationState(recordId, message = message)
     }
 
     /** "Notify me when supported": flags the scan record, or files a standalone wishlist entry. */

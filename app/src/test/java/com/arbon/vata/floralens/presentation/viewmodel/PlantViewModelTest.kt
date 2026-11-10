@@ -43,7 +43,7 @@ import org.junit.jupiter.api.Test
 /**
  * Cloud verification paths of [PlantViewModel]: the Plant.id health assessment
  * for unsupported species, the full species+disease recheck for supported ones,
- * and the unsupported-scan rewrite during the initial cascade.
+ * and the transition from a local result to a requested second opinion.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class PlantViewModelTest {
@@ -63,7 +63,7 @@ class PlantViewModelTest {
         every { plantRecordRepository.observeAll() } returns MutableStateFlow(emptyList())
         every { plantRecordRepository.observeTracked() } returns MutableStateFlow(emptyList())
         coEvery { plantRecordRepository.save(capture(savedRecord)) } answers { savedRecord.captured }
-        coEvery { plantRecordRepository.saveScan(any<Bitmap>(), any()) } answers { secondArg<PlantRecord>().copy(id = 7L) }
+        coEvery { plantRecordRepository.saveScan(any<Bitmap>(), any()) } answers { secondArg<PlantRecord>().copy(id = 7L, photoPath = "scan.jpg") }
         coEvery { plantRecordRepository.decodeSavedPhoto(any()) } returns bitmap
     }
 
@@ -169,9 +169,7 @@ class PlantViewModelTest {
         vm.verifyUnsupportedWithCloud(unsupportedBananaScan())
         advanceUntilIdle()
 
-        val saved = savedRecord.captured
-        assertFalse(saved.hasHealthAssessment)
-        assertFalse(saved.isCloudVerified)
+        coVerify(exactly = 0) { plantRecordRepository.save(any()) }
         assertEquals("No cloud health assessment was returned. Check your connection, API key, and credits.", vm.cloudVerificationState.value?.message)
     }
 
@@ -196,18 +194,25 @@ class PlantViewModelTest {
     fun `correction made during verification wins over the cloud response`() = runTest {
         val vm = createViewModel()
         val record = unsupportedBananaScan().copy(isSupported = true, detectedSpecies = "Tomato", commonName = "Tomato")
+        val speciesResponse = CompletableDeferred<SpeciesMatch?>()
         val response = CompletableDeferred<DiseaseAssessment?>()
-        coEvery { speciesIdentifier.identify(bitmap) } returns SpeciesMatch("Tomato", "Solanum lycopersicum", 0.9f, true)
+        coEvery { speciesIdentifier.identify(bitmap) } coAnswers { speciesResponse.await() }
         coEvery { diseaseVerifier.assess(bitmap) } coAnswers { response.await() }
         coEvery { plantRecordRepository.get(record.id) } answers { savedRecord.captured }
 
         vm.verifyWithCloud(record)
+        assertEquals(CloudVerificationStep.PREPARING_PHOTO, vm.cloudVerificationState.value?.step)
         runCurrent()
+        assertEquals(CloudVerificationStep.CHECKING_SPECIES, vm.cloudVerificationState.value?.step)
+        speciesResponse.complete(SpeciesMatch("Tomato", "Solanum lycopersicum", 0.9f, true))
+        runCurrent()
+        assertEquals(CloudVerificationStep.CHECKING_HEALTH, vm.cloudVerificationState.value?.step)
         vm.correctDiagnosis(record, "Corn", "Corn___Northern_Leaf_Blight")
         runCurrent()
         response.complete(DiseaseAssessment(true, null, 0.98f))
         advanceUntilIdle()
 
+        assertNull(vm.cloudVerificationState.value?.step)
         coVerify(exactly = 1) { plantRecordRepository.save(any()) }
         assertEquals("Corn", savedRecord.captured.detectedSpecies)
         assertEquals("user_corrected:Corn___Northern_Leaf_Blight", savedRecord.captured.onDeviceLabel)
@@ -257,7 +262,7 @@ class PlantViewModelTest {
     }
 
     @Test
-    fun `scan saves an unsupported cloud species without claiming a health assessment`() = runTest {
+    fun `uncertain scan waits for a request before identifying an unsupported species`() = runTest {
         val vm = createViewModel()
         coEvery { cascadeClassifier.diagnose(bitmap) } returns
             CascadeClassifier.Verdict.NeedsSecondOpinion(
@@ -267,6 +272,15 @@ class PlantViewModelTest {
         coEvery { speciesIdentifier.identify(bitmap) } returns SpeciesMatch("Banana", "Musa", 0.92f, isSupported = false)
 
         vm.scan(bitmap)
+        advanceUntilIdle()
+
+        val local = vm.scanState.value as ScanState.OnDeviceResult
+        assertTrue(local.needsCloud)
+        assertEquals("Tomato", local.record.detectedSpecies)
+        coVerify(exactly = 0) { speciesIdentifier.identify(any()) }
+        coVerify(exactly = 0) { diseaseVerifier.assess(any()) }
+        coEvery { plantRecordRepository.get(local.record.id) } returns local.record
+        vm.verifyWithCloud(local.record)
         advanceUntilIdle()
 
         val saved = savedRecord.captured
@@ -292,6 +306,11 @@ class PlantViewModelTest {
         coEvery { diseaseVerifier.assess(bitmap) } returns null
 
         vm.scan(bitmap)
+        advanceUntilIdle()
+
+        val local = vm.scanState.value as ScanState.OnDeviceResult
+        coEvery { plantRecordRepository.get(local.record.id) } returns local.record
+        vm.verifyWithCloud(local.record)
         advanceUntilIdle()
 
         val record = (vm.scanState.value as ScanState.CloudResult).record
@@ -333,6 +352,11 @@ class PlantViewModelTest {
         vm.scan(bitmap)
         advanceUntilIdle()
 
+        val local = vm.scanState.value as ScanState.OnDeviceResult
+        coEvery { plantRecordRepository.get(local.record.id) } returns local.record
+        vm.verifyWithCloud(local.record)
+        advanceUntilIdle()
+
         val record = (vm.scanState.value as ScanState.CloudResult).record
         assertTrue(record.isHealthy)
         assertFalse(record.isDiagnosisUnknown())
@@ -350,11 +374,16 @@ class PlantViewModelTest {
         coEvery { diseaseVerifier.assess(bitmap) } returns DiseaseAssessment(true, null, 0.6f)
         vm.scan(bitmap)
         advanceUntilIdle()
+
+        val local = vm.scanState.value as ScanState.OnDeviceResult
+        coEvery { plantRecordRepository.get(local.record.id) } returns local.record
+        vm.verifyWithCloud(local.record)
+        advanceUntilIdle()
         assertEquals(0.6f, (vm.scanState.value as ScanState.CloudResult).record.confidence)
     }
 
     @Test
-    fun `camera focus crop goes only to the offline model while full photo is saved and uploaded`() = runTest {
+    fun `camera focus crop goes only to the offline model while full photo is saved`() = runTest {
         val vm = createViewModel()
         val crop = mockk<Bitmap>(relaxed = true)
         every { bitmap.width } returns 1000
@@ -365,16 +394,14 @@ class PlantViewModelTest {
             coEvery { cascadeClassifier.diagnose(crop) } returns CascadeClassifier.Verdict.NeedsSecondOpinion(
                 ClassPrediction("Tomato___healthy", 0.6f), null,
             )
-            coEvery { speciesIdentifier.identify(bitmap) } returns null
-            coEvery { diseaseVerifier.assess(bitmap) } returns null
 
             vm.scan(bitmap, PhotoRegion(200, 100, 600, 500))
             advanceUntilIdle()
 
             coVerify(exactly = 1) { cascadeClassifier.diagnose(crop) }
             coVerify(exactly = 1) { plantRecordRepository.saveScan(bitmap, any()) }
-            coVerify(exactly = 1) { speciesIdentifier.identify(bitmap) }
-            coVerify(exactly = 1) { diseaseVerifier.assess(bitmap) }
+            coVerify(exactly = 0) { speciesIdentifier.identify(any()) }
+            coVerify(exactly = 0) { diseaseVerifier.assess(any()) }
             verify(exactly = 1) { crop.recycle() }
             verify(exactly = 0) { bitmap.recycle() }
         } finally {
@@ -510,6 +537,11 @@ class PlantViewModelTest {
         coEvery { speciesIdentifier.identify(bitmap) } returns SpeciesMatch("Tomato", "Lycopersicon esculentum", 0.88f, isSupported = true)
         coEvery { diseaseVerifier.assess(bitmap) } returns DiseaseAssessment(isHealthy = true, diseaseName = null, confidence = 0.9f)
         vm.scan(bitmap)
+        advanceUntilIdle()
+
+        val local = vm.scanState.value as ScanState.OnDeviceResult
+        coEvery { plantRecordRepository.get(local.record.id) } returns local.record
+        vm.verifyWithCloud(local.record)
         advanceUntilIdle()
         assertTrue(vm.scanState.value is ScanState.CloudResult)
 

@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arbon.vata.floralens.presentation.viewmodel.CloudVerificationStep
 
 @Composable
 fun ResultUnsupportedScreen(
@@ -15,7 +16,7 @@ fun ResultUnsupportedScreen(
     hasCloudHealthAssessment: Boolean = false,
     healthAssessmentHealthy: Boolean? = null,
     healthAssessmentDisease: String? = null,
-    isSecondOpinionRunning: Boolean = false,
+    cloudVerificationStep: CloudVerificationStep? = null,
     secondOpinionMessage: String? = null,
     queuePosition: Int = 128,
     onNotifyClick: () -> Unit = {},
@@ -80,16 +81,10 @@ fun ResultUnsupportedScreen(
                 modifier = Modifier.padding(bottom = 4.dp),
             )
         }
-        TextButton(
-            onClick = onSecondOpinionClick,
-            enabled = !isSecondOpinionRunning,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            if (isSecondOpinionRunning) {
-                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
-                Spacer(Modifier.width(8.dp))
-                Text("Checking with Plant.id…")
-            } else {
+        if (cloudVerificationStep != null) {
+            CloudAnalysisProgress(cloudVerificationStep)
+        } else {
+            TextButton(onClick = onSecondOpinionClick, modifier = Modifier.fillMaxWidth()) {
                 Text(if (hasCloudHealthAssessment) "Check again with Plant.id" else "Get AI second opinion")
             }
         }

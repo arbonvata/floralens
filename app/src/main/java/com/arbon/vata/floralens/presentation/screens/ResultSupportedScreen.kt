@@ -18,13 +18,14 @@ import com.arbon.vata.floralens.domain.advice.DiseaseAdvice
 import com.arbon.vata.floralens.domain.classifier.PlantLabels
 import com.arbon.vata.floralens.presentation.testdata.tomatoEarlyBlight
 import com.arbon.vata.floralens.presentation.testdata.tomatoEarlyBlightCloudVerified
+import com.arbon.vata.floralens.presentation.viewmodel.CloudVerificationStep
 
 
 @Composable
 fun ResultSupportedScreen(
     record: PlantRecord = tomatoEarlyBlight,
     needsCloud: Boolean = false,
-    isCloudVerificationRunning: Boolean = false,
+    cloudVerificationStep: CloudVerificationStep? = null,
     cloudVerificationMessage: String? = null,
     onVerifyWithCloudClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
@@ -104,42 +105,26 @@ fun ResultSupportedScreen(
                 if (!record.isCloudVerified && !record.isUserCorrected()) {
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "Unverified on-device estimate. Check the result against a clear photo before treating the plant.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.secondary,
-                    )
-                }
-                if(needsCloud) {
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = if (record.isCloudVerified && record.cloudLabel != null) {
-                            "Cloud health assessment: ${record.cloudLabel}"
+                        if (needsCloud) {
+                            "The on-device model is unsure. You can send this photo for a cloud second opinion."
                         } else {
-                            "Disease check unavailable - showing the unverified on-device estimate"
+                            "Unverified on-device estimate. Check the result against a clear photo before treating the plant."
                         },
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = MaterialTheme.colorScheme.secondary,
                     )
                 }
             }
         }
         Spacer(Modifier.height(16.dp))
-        if (!record.isCloudVerified) {
+        if (cloudVerificationStep != null) {
+            CloudAnalysisProgress(cloudVerificationStep)
+        } else if (!record.isCloudVerified) {
             OutlinedButton(
                 onClick = onVerifyWithCloudClick,
-                enabled = !isCloudVerificationRunning,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                if (isCloudVerificationRunning) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
-                        strokeWidth = 2.dp,
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text("Checking with cloud…")
-                } else {
-                    Text("Verify with cloud")
-                }
+                Text(if (needsCloud) "Get cloud second opinion" else "Verify with cloud")
             }
         }
         cloudVerificationMessage?.let { message ->
@@ -271,5 +256,5 @@ fun ResultSupportedPreview() {
 @Preview(showBackground = true, name = "Result - With Second Opinion")
 @Composable
 fun ResultWithCloudPreview() {
-    MaterialTheme { ResultSupportedScreen(record = tomatoEarlyBlightCloudVerified, needsCloud = true) }
+    MaterialTheme { ResultSupportedScreen(record = tomatoEarlyBlightCloudVerified) }
 }
